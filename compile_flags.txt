@@ -1,0 +1,3 @@
+-xc
+-std=c99
+-Wintrinsics-std
