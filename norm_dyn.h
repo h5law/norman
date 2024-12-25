@@ -21,8 +21,13 @@ Harry Law
 harry@h5law.com
 
 TODO:
-  - Add tests covering the different possible outcomes of the implementation
-  - Think about and support NULL/zero detection for size changes
+  -> Add tests covering the different possible outcomes of the implementation
+  -> Think about and support NULL/zero detection for size changes
+  -> Add a default hasher - implementing SipHash 2-4
+  -> Support non-string key types (hash the byte values of the key - not a
+     pointer)
+  -> Move generic macros into their own header+implementation combo
+  -> Tidy up guards for header, tests and implementation
  */
 
 #ifdef __cplusplus
@@ -75,7 +80,7 @@ norm_vector_t norm_vector_clone(norm_vector_t *vec, size_t elem_size);
 norm_vector_t norm_vector_concat(norm_vector_t *vec1, norm_vector_t *vec2,
                                  size_t elem_size);
 
-#define NORM_MAP_MAX_KEY_LEN 16
+#define NORM_MAP_MAX_KEY_LEN 32
 
 struct norm_map_entry_t {
     size_t key_length;
@@ -465,7 +470,7 @@ int norm_map_rehash(norm_map_t *map, size_t elem_size)
         entry = norm_vector_gpos(&(map->table), i, entry_size);
         if (entry == NULL)
             continue;
-        if (memzcmp(entry, entry_size) == 0)
+        if (memzcmp(entry, entry_size))
             continue;
         index = map->hasher_fn(new_arr, (char *)entry->kv, entry->key_length,
                                entry_size, map->table.capacity);
@@ -479,224 +484,226 @@ int norm_map_rehash(norm_map_t *map, size_t elem_size)
     return NORM_DYN_ERR_OKAY;
 }
 
-#ifdef NORM_DYN_DS_GENERIC_MACROS
-
-////////////////////////////////////////////////////////////////////////////////
-//                       Dynamic Array Generic Macros //
-////////////////////////////////////////////////////////////////////////////////
-
-#define NORM_DYN_DS_DEFINE(T)                                                  \
-    typedef struct vector_##T {                                                \
-        int size, end_ptr, capacity;                                           \
-        double load_factor_pct;                                                \
-        T *array;                                                              \
-    } vector_##T;
-
-#define NORM_DYN_DSTOR_INIT(T, cap, limit_pct)                                 \
-    ({                                                                         \
-        vector_##T vec = {0};                                                  \
-        if ((double)limit_pct > 0.0 || (double)limit_pct <= 1.0) {             \
-            vec.capacity = (int)cap;                                           \
-            vec.load_factor_pct = (double)limit_pct;                           \
-            vec.array = (T *)calloc(cap, sizeof(T));                           \
-        }                                                                      \
-        vec;                                                                   \
-    })
-
-#define NORM_DYN_DS_GPOS(vec, T, index)                                        \
-    ({                                                                         \
-        T val = {0};                                                           \
-        if ((int)index >= 0 && (int)index < ((vector_##T *)vec)->capacity)     \
-            memcpy(&val, ((vector_##T *)vec)->array + (int)index, sizeof(T));  \
-        val;                                                                   \
-    })
-
-#define NORM_DYN_DS_SPOS(vec, T, val, index)                                   \
-    ({                                                                         \
-        bool success = true;                                                   \
-        if ((int)index < 0 || (int)index >= ((vector_##T *)vec)->capacity)     \
-            success = false;                                                   \
-        else {                                                                 \
-            int err = CHECKINT_NO_ERROR;                                       \
-            int new_size =                                                     \
-                    check_int32_add(((vector_##T *)vec)->size, 1, &err);       \
-            if (err != CHECKINT_NO_ERROR)                                      \
-                success = false;                                               \
-            else {                                                             \
-                if ((double)new_size >                                         \
-                    (double)(((vector_##T *)vec)->capacity) *                  \
-                            ((vector_##T *)vec)->load_factor_pct) {            \
-                    int new_cap = check_int32_mul(                             \
-                            (int)((vector_##T *)vec)->capacity, 2, &err);      \
-                    if (err != CHECKINT_NO_ERROR)                              \
-                        success = false;                                       \
-                    else                                                       \
-                        success = NORM_DYN_DS_RESIZE((vector_##T *)vec, T,     \
-                                                     new_cap);                 \
-                }                                                              \
-                if (success) {                                                 \
-                    ((vector_##T *)vec)->end_ptr =                             \
-                            (int)index >= ((vector_##T *)vec)->end_ptr         \
-                                    ? index + 1                                \
-                                    : ((vector_##T *)vec)->end_ptr;            \
-                    ((vector_##T *)vec)->size = new_size;                      \
-                    memcpy(((vector_##T *)vec)->array + (int)index,            \
-                           (T *)(&(val)), sizeof(T));                          \
-                };                                                             \
-            };                                                                 \
-        };                                                                     \
-        success;                                                               \
-    })
-
-#define NORM_DYN_DS_PUSH(vec, T, val)                                          \
-    ({                                                                         \
-        bool success = true;                                                   \
-        int err = CHECKINT_NO_ERROR;                                           \
-        int new_size = check_int32_add(((vector_##T *)vec)->size, 1, &err);    \
-        if (err != CHECKINT_NO_ERROR)                                          \
-            success = false;                                                   \
-        int index = ((vector_##T *)vec)->end_ptr;                              \
-        if (success) {                                                         \
-            if ((double)new_size >                                             \
-                (double)(((vector_##T *)vec)->capacity) *                      \
-                        ((vector_##T *)vec)->load_factor_pct) {                \
-                int new_cap = check_int32_mul(                                 \
-                        (int)((vector_##T *)vec)->capacity, 2, &err);          \
-                if (err != CHECKINT_NO_ERROR)                                  \
-                    success = false;                                           \
-                else                                                           \
-                    success =                                                  \
-                            NORM_DYN_DS_RESIZE((vector_##T *)vec, T, new_cap); \
-            }                                                                  \
-            memcpy(((vector_##T *)vec)->array + index, (T *)(&(val)),          \
-                   sizeof(T));                                                 \
-            ((vector_##T *)vec)->size = new_size;                              \
-            ((vector_##T *)vec)->end_ptr =                                     \
-                    check_int32_add(((vector_##T *)vec)->end_ptr, 1, &err);    \
-            if (err != CHECKINT_NO_ERROR)                                      \
-                success = false;                                               \
-        }                                                                      \
-        success;                                                               \
-    })
-
-#define NORM_DYN_DS_ZPOS(vec, T, index)                                        \
-    ({                                                                         \
-        bool success = true;                                                   \
-        int err = CHECKINT_NO_ERROR;                                           \
-        int new_size = check_int32_sub(((vector_##T *)vec)->size, 1, &err);    \
-        if (err != CHECKINT_NO_ERROR)                                          \
-            success = false;                                                   \
-        else {                                                                 \
-            memset(((vector_##T *)vec)->array + index, 0, sizeof(T));          \
-            ((vector_##T *)vec)->size = new_size;                              \
-            if (((vector_##T *)vec)->end_ptr == index + 1)                     \
-                --((vector_##T *)vec)->end_ptr;                                \
-        }                                                                      \
-        success;                                                               \
-    })
-
-#define NORM_DYN_DS_COMPACT(vec, T)                                            \
-    ({                                                                         \
-        int gap, cont, index = 0;                                              \
-        T zero = {0};                                                          \
-        while (index < ((vector_##T *)vec)->capacity) {                        \
-            int curr = memcmp(((vector_##T *)vec)->array + index, &zero,       \
-                              sizeof(T));                                      \
-            if (curr == 0) {                                                   \
-                ++gap;                                                         \
-                ++index;                                                       \
-                continue;                                                      \
-            }                                                                  \
-            while (curr != 0) {                                                \
-                ++cont;                                                        \
-                ++index;                                                       \
-                curr = memcmp(((vector_##T *)vec)->array + index, &zero,       \
-                              sizeof(T));                                      \
-            }                                                                  \
-            if (gap == 0) {                                                    \
-                cont = 0;                                                      \
-                continue;                                                      \
-            }                                                                  \
-            int gap_start = index - cont - gap;                                \
-            int elem_start = index - cont;                                     \
-            memmove(((vector_##T *)vec)->array + gap_start,                    \
-                    ((vector_##T *)vec)->array + elem_start,                   \
-                    cont * sizeof(T));                                         \
-            if (cont <= gap) {                                                 \
-                memset(((vector_##T *)vec)->array + elem_start, 0,             \
-                       cont * sizeof(T));                                      \
-            } else {                                                           \
-            }                                                                  \
-            gap = cont < gap ? elem_start + (cont - gap) : elem_start;         \
-            cont = 0;                                                          \
-        }                                                                      \
-        ((vector_##T *)vec)->end_ptr = ((vector_##T *)vec)->size;              \
-    })
-
-#define NORM_DYN_DS_CLONE(vec, T)                                              \
-    ({                                                                         \
-        vector_##T dup =                                                       \
-                NORM_DYN_DS_INIT(T, ((vector_##T *)vec)->capacity,             \
-                                 ((vector_##T *)vec)->load_factor_pct);        \
-        dup.size = ((vector_##T *)vec)->size;                                  \
-        memcpy(dup.array, ((vector_##T *)vec)->array,                          \
-               ((vector_##T *)vec)->capacity * sizeof(T));                     \
-        dup;                                                                   \
-    })
-
-#define NORM_DYN_DS_CONCAT(vec1, vec2, T)                                      \
-    ({                                                                         \
-        double x = ((vector_##T *)vec1)->load_factor_pct;                      \
-        double y = ((vector_##T *)vec2)->load_factor_pct;                      \
-        double lim = fmin(x, y);                                               \
-        vector_##T new_vec =                                                   \
-                NORM_DYN_DS_INIT(T,                                            \
-                                 ((vector_##T *)vec1)->capacity +              \
-                                         ((vector_##T *)vec2)->capacity,       \
-                                 lim);                                         \
-        new_vec.size =                                                         \
-                ((vector_##T *)vec1)->size + ((vector_##T *)vec2)->size;       \
-        memcpy((&new_vec)->array, ((vector_##T *)vec1)->array,                 \
-               ((vector_##T *)vec1)->capacity * sizeof(T));                    \
-        memcpy((&new_vec)->array + ((vector_##T *)vec1)->capacity,             \
-               ((vector_##T *)vec2)->array,                                    \
-               ((vector_##T *)vec2)->capacity * sizeof(T));                    \
-        new_vec;                                                               \
-    })
-
-#define NORM_DYN_DS_RESIZE(vec, T, new_cap)                                    \
-    ({                                                                         \
-        T *new_array = (T *)calloc((int)new_cap, sizeof(T));                   \
-        bool success = new_array != NULL;                                      \
-        if (success) {                                                         \
-            int x = (int)new_cap;                                              \
-            int y = ((vector_##T *)vec)->capacity;                             \
-            int len = x > y ? y : x;                                           \
-            memcpy(new_array, (T *)((vector_##T *)vec)->array,                 \
-                   len * sizeof(T));                                           \
-            free((T *)(((vector_##T *)vec)->array));                           \
-            ((vector_##T *)vec)->array = new_array;                            \
-            ((vector_##T *)vec)->capacity = new_cap;                           \
-        }                                                                      \
-        success;                                                               \
-    })
-
-#define NORM_DYN_DS_EMPTY(vec, T)                                              \
-    ({                                                                         \
-        bool success = false;                                                  \
-        memset(((vector_##T *)vec)->array, 0,                                  \
-               ((vector_##T *)vec)->capacity * sizeof(T));                     \
-        ((vector_##T *)vec)->size = 0;                                         \
-        success;                                                               \
-    })
-
-#define NORM_DYN_DS_FREE(vec, T)                                               \
-    ({                                                                         \
-        free((T *)(((vector_##T *)vec)->array));                               \
-        memset(((vector_##T *)vec), 0, sizeof(vector_##T));                    \
-    })
-
-#endif /* ifdef NORM_DYN_DS_GENERIC_MACROS */
+// #ifdef NORM_DYN_DS_GENERIC_MACROS
+//
+// ////////////////////////////////////////////////////////////////////////////////
+// //                       Dynamic Array Generic Macros //
+// ////////////////////////////////////////////////////////////////////////////////
+//
+// #define NORM_DYN_DS_DEFINE(T) \
+//     typedef struct vector_##T { \
+//         int size, end_ptr, capacity; \
+//         double load_factor_pct; \
+//         T *array; \
+//     } vector_##T;
+//
+// #define NORM_DYN_DSTOR_INIT(T, cap, limit_pct) \
+//     ({ \
+//         vector_##T vec = {0}; \
+//         if ((double)limit_pct > 0.0 || (double)limit_pct <= 1.0) { \
+//             vec.capacity = (int)cap; \
+//             vec.load_factor_pct = (double)limit_pct; \
+//             vec.array = (T *)calloc(cap, sizeof(T)); \
+//         } \
+//         vec; \
+//     })
+//
+// #define NORM_DYN_DS_GPOS(vec, T, index) \
+//     ({ \
+//         T val = {0}; \
+//         if ((int)index >= 0 && (int)index < ((vector_##T *)vec)->capacity) \
+//             memcpy(&val, ((vector_##T *)vec)->array + (int)index, sizeof(T));
+//             \
+//         val; \
+//     })
+//
+// #define NORM_DYN_DS_SPOS(vec, T, val, index) \
+//     ({ \
+//         bool success = true; \
+//         if ((int)index < 0 || (int)index >= ((vector_##T *)vec)->capacity) \
+//             success = false; \
+//         else { \
+//             int err = CHECKINT_NO_ERROR; \
+//             int new_size = \
+//                     check_int32_add(((vector_##T *)vec)->size, 1, &err); \
+//             if (err != CHECKINT_NO_ERROR) \
+//                 success = false; \
+//             else { \
+//                 if ((double)new_size > \
+//                     (double)(((vector_##T *)vec)->capacity) * \
+//                             ((vector_##T *)vec)->load_factor_pct) { \
+//                     int new_cap = check_int32_mul( \
+//                             (int)((vector_##T *)vec)->capacity, 2, &err); \
+//                     if (err != CHECKINT_NO_ERROR) \
+//                         success = false; \
+//                     else \
+//                         success = NORM_DYN_DS_RESIZE((vector_##T *)vec, T, \
+//                                                      new_cap); \
+//                 } \
+//                 if (success) { \
+//                     ((vector_##T *)vec)->end_ptr = \
+//                             (int)index >= ((vector_##T *)vec)->end_ptr \
+//                                     ? index + 1 \
+//                                     : ((vector_##T *)vec)->end_ptr; \
+//                     ((vector_##T *)vec)->size = new_size; \
+//                     memcpy(((vector_##T *)vec)->array + (int)index, \
+//                            (T *)(&(val)), sizeof(T)); \
+//                 }; \
+//             }; \
+//         }; \
+//         success; \
+//     })
+//
+// #define NORM_DYN_DS_PUSH(vec, T, val) \
+//     ({ \
+//         bool success = true; \
+//         int err = CHECKINT_NO_ERROR; \
+//         int new_size = check_int32_add(((vector_##T *)vec)->size, 1, &err); \
+//         if (err != CHECKINT_NO_ERROR) \
+//             success = false; \
+//         int index = ((vector_##T *)vec)->end_ptr; \
+//         if (success) { \
+//             if ((double)new_size > \
+//                 (double)(((vector_##T *)vec)->capacity) * \
+//                         ((vector_##T *)vec)->load_factor_pct) { \
+//                 int new_cap = check_int32_mul( \
+//                         (int)((vector_##T *)vec)->capacity, 2, &err); \
+//                 if (err != CHECKINT_NO_ERROR) \
+//                     success = false; \
+//                 else \
+//                     success = \
+//                             NORM_DYN_DS_RESIZE((vector_##T *)vec, T,
+//                             new_cap); \
+//             } \
+//             memcpy(((vector_##T *)vec)->array + index, (T *)(&(val)), \
+//                    sizeof(T)); \
+//             ((vector_##T *)vec)->size = new_size; \
+//             ((vector_##T *)vec)->end_ptr = \
+//                     check_int32_add(((vector_##T *)vec)->end_ptr, 1, &err); \
+//             if (err != CHECKINT_NO_ERROR) \
+//                 success = false; \
+//         } \
+//         success; \
+//     })
+//
+// #define NORM_DYN_DS_ZPOS(vec, T, index) \
+//     ({ \
+//         bool success = true; \
+//         int err = CHECKINT_NO_ERROR; \
+//         int new_size = check_int32_sub(((vector_##T *)vec)->size, 1, &err); \
+//         if (err != CHECKINT_NO_ERROR) \
+//             success = false; \
+//         else { \
+//             memset(((vector_##T *)vec)->array + index, 0, sizeof(T)); \
+//             ((vector_##T *)vec)->size = new_size; \
+//             if (((vector_##T *)vec)->end_ptr == index + 1) \
+//                 --((vector_##T *)vec)->end_ptr; \
+//         } \
+//         success; \
+//     })
+//
+// #define NORM_DYN_DS_COMPACT(vec, T) \
+//     ({ \
+//         int gap, cont, index = 0; \
+//         T zero = {0}; \
+//         while (index < ((vector_##T *)vec)->capacity) { \
+//             int curr = memcmp(((vector_##T *)vec)->array + index, &zero, \
+//                               sizeof(T)); \
+//             if (curr == 0) { \
+//                 ++gap; \
+//                 ++index; \
+//                 continue; \
+//             } \
+//             while (curr != 0) { \
+//                 ++cont; \
+//                 ++index; \
+//                 curr = memcmp(((vector_##T *)vec)->array + index, &zero, \
+//                               sizeof(T)); \
+//             } \
+//             if (gap == 0) { \
+//                 cont = 0; \
+//                 continue; \
+//             } \
+//             int gap_start = index - cont - gap; \
+//             int elem_start = index - cont; \
+//             memmove(((vector_##T *)vec)->array + gap_start, \
+//                     ((vector_##T *)vec)->array + elem_start, \
+//                     cont * sizeof(T)); \
+//             if (cont <= gap) { \
+//                 memset(((vector_##T *)vec)->array + elem_start, 0, \
+//                        cont * sizeof(T)); \
+//             } else { \
+//             } \
+//             gap = cont < gap ? elem_start + (cont - gap) : elem_start; \
+//             cont = 0; \
+//         } \
+//         ((vector_##T *)vec)->end_ptr = ((vector_##T *)vec)->size; \
+//     })
+//
+// #define NORM_DYN_DS_CLONE(vec, T) \
+//     ({ \
+//         vector_##T dup = \
+//                 NORM_DYN_DS_INIT(T, ((vector_##T *)vec)->capacity, \
+//                                  ((vector_##T *)vec)->load_factor_pct); \
+//         dup.size = ((vector_##T *)vec)->size; \
+//         memcpy(dup.array, ((vector_##T *)vec)->array, \
+//                ((vector_##T *)vec)->capacity * sizeof(T)); \
+//         dup; \
+//     })
+//
+// #define NORM_DYN_DS_CONCAT(vec1, vec2, T) \
+//     ({ \
+//         double x = ((vector_##T *)vec1)->load_factor_pct; \
+//         double y = ((vector_##T *)vec2)->load_factor_pct; \
+//         double lim = fmin(x, y); \
+//         vector_##T new_vec = \
+//                 NORM_DYN_DS_INIT(T, \
+//                                  ((vector_##T *)vec1)->capacity + \
+//                                          ((vector_##T *)vec2)->capacity, \
+//                                  lim); \
+//         new_vec.size = \
+//                 ((vector_##T *)vec1)->size + ((vector_##T *)vec2)->size; \
+//         memcpy((&new_vec)->array, ((vector_##T *)vec1)->array, \
+//                ((vector_##T *)vec1)->capacity * sizeof(T)); \
+//         memcpy((&new_vec)->array + ((vector_##T *)vec1)->capacity, \
+//                ((vector_##T *)vec2)->array, \
+//                ((vector_##T *)vec2)->capacity * sizeof(T)); \
+//         new_vec; \
+//     })
+//
+// #define NORM_DYN_DS_RESIZE(vec, T, new_cap) \
+//     ({ \
+//         T *new_array = (T *)calloc((int)new_cap, sizeof(T)); \
+//         bool success = new_array != NULL; \
+//         if (success) { \
+//             int x = (int)new_cap; \
+//             int y = ((vector_##T *)vec)->capacity; \
+//             int len = x > y ? y : x; \
+//             memcpy(new_array, (T *)((vector_##T *)vec)->array, \
+//                    len * sizeof(T)); \
+//             free((T *)(((vector_##T *)vec)->array)); \
+//             ((vector_##T *)vec)->array = new_array; \
+//             ((vector_##T *)vec)->capacity = new_cap; \
+//         } \
+//         success; \
+//     })
+//
+// #define NORM_DYN_DS_EMPTY(vec, T) \
+//     ({ \
+//         bool success = false; \
+//         memset(((vector_##T *)vec)->array, 0, \
+//                ((vector_##T *)vec)->capacity * sizeof(T)); \
+//         ((vector_##T *)vec)->size = 0; \
+//         success; \
+//     })
+//
+// #define NORM_DYN_DS_FREE(vec, T) \
+//     ({ \
+//         free((T *)(((vector_##T *)vec)->array)); \
+//         memset(((vector_##T *)vec), 0, sizeof(vector_##T)); \
+//     })
+//
+// #endif /* ifdef NORM_DYN_DS_GENERIC_MACROS */
 
 #endif /* ifdef NORM_DYN_DS_IMPLEMENTATION */
 
