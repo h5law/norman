@@ -23,7 +23,7 @@ harry@h5law.com
 TODO:
   -> Add tests covering the different possible outcomes of the implementation
   -> Think about and support NULL/zero detection for size changes
-  -> Add a default hasher - implementing SipHash 2-4
+  -> Add a default hasher_fn - implementing SipHash 2-4/xxHash from paper
   -> Support non-string key types (hash the byte values of the key - not a
      pointer)
   -> Move generic macros into their own header+implementation combo
@@ -49,6 +49,7 @@ extern "C" {
 #define NORM_DYN_ERR_OFLOW 3
 #define NORM_DYN_ERR_UFLOW 4
 
+#include <stdint.h>
 #include <sys/types.h>
 
 struct norm_vector_t {
@@ -110,11 +111,14 @@ int norm_map_set(norm_map_t *map, const char *key, void *elem,
 int norm_map_delete(norm_map_t *map, const char *key, size_t key_length,
                     size_t elem_size);
 int norm_map_clear(norm_map_t *map, size_t elem_size);
+size_t default_hasher(void *table, const char *key, size_t key_length,
+                      size_t elem_size, size_t table_length);
 
 #endif /* ifndef NORM_DYN_DS_H */
 
 #ifdef NORM_DYN_DS_IMPLEMENTATION
 
+#include <assert.h>
 #include <checkint.h>
 #include <math.h>
 #include <stdlib.h>
@@ -374,10 +378,17 @@ norm_map_t norm_map_init(size_t min_capacity, double load_factor,
     if (load_factor <= 0 || load_factor > 1 || min_capacity <= 0 ||
         elem_size <= 0 || hasher_fn == NULL)
         return map;
+    uint32_t cap2 = min_capacity;
+    --cap2;
+    cap2 |= cap2 >> 1;
+    cap2 |= cap2 >> 2;
+    cap2 |= cap2 >> 4;
+    cap2 |= cap2 >> 8;
+    cap2 |= cap2 >> 16;
+    ++cap2;
     norm_vector_t vec = {0};
-    vec = norm_vector_init(min_capacity, load_factor,
-                           norm__map_entry_size(elem_size));
-    if (vec.capacity != min_capacity)
+    vec = norm_vector_init(cap2, load_factor, norm__map_entry_size(elem_size));
+    if (vec.capacity != cap2)
         return map;
     map.table = vec;
     map.hasher_fn = hasher_fn;
@@ -462,7 +473,6 @@ int norm_map_rehash(norm_map_t *map, size_t elem_size)
     char *new_arr = calloc(map->table.capacity, entry_size);
     if (new_arr == NULL)
         return NORM_DYN_ERR_ALLOC;
-    int curr;
     size_t index;
     size_t end_ptr = 0;
     for (size_t i = 0; i < map->table.capacity; ++i) {
@@ -704,6 +714,207 @@ int norm_map_rehash(norm_map_t *map, size_t elem_size)
 //     })
 //
 // #endif /* ifdef NORM_DYN_DS_GENERIC_MACROS */
+
+////////////////////////////////////////////////////////////////////////////////
+//                              Hasher Function                               //
+////////////////////////////////////////////////////////////////////////////////
+
+// TODO: Implement a hasher to be used in the default hasher_fn
+//       Implement either SipHash 2-4 or xxHash from scratch (64 bit variant)
+
+#define PRINT_BINARY_64(x)                                                     \
+    do {                                                                       \
+        uint64_t b = (x);                                                      \
+        for (int i = 63; i >= 0; i--) {                                        \
+            putchar('0' + ((b >> i) & 1));                                     \
+            if (i % 8 == 0)                                                    \
+                putchar(' ');                                                  \
+        }                                                                      \
+        putchar('\n');                                                         \
+    } while (0)
+
+#define perm3(a, b, c)                                                         \
+    do {                                                                       \
+        uint32_t ta = a;                                                       \
+        uint32_t tb = b;                                                       \
+        a = b;                                                                 \
+        b = ta;                                                                \
+        a = c;                                                                 \
+        c = tb;                                                                \
+    } while (0);
+
+// Some primes between 2^63 and 2^64 for various uses.
+static const uint64_t k0 = 0xc3a5c85c97cb3127ULL;
+static const uint64_t k1 = 0xb492b66fbe98f273ULL;
+static const uint64_t k2 = 0x9ae16a3b2f90404fULL;
+
+// Magic numbers for 32-bit hashing.  Copied from Murmur3.
+static const uint32_t c1 = 0xcc9e2d51;
+static const uint32_t c2 = 0x1b873593;
+
+static inline uint32_t rot32(uint32_t val, int shift)
+{
+    return shift == 0 ? val : ((val >> shift) | (val << (32 - shift)));
+}
+
+static inline uint32_t mix(uint32_t h)
+{
+    h ^= h >> 16;
+    h *= 0x85ebca6b;
+    h ^= h >> 13;
+    h *= 0xc2b2ae35;
+    h ^= h >> 16;
+    return h;
+}
+
+static inline uint32_t merge(uint32_t a, uint32_t h)
+{
+    a *= c1;
+    a = rot32(a, 17);
+    a *= c2;
+    h ^= a;
+    h = rot32(h, 19);
+    return h * 5 + 0xe6546b64;
+}
+
+#include <libkern/OSByteOrder.h>
+
+static inline uint32_t simple_hash_32(char *in, size_t len)
+{
+    if (24 > len) {
+        if (len >= 17) {
+            uint64_t m = k2 + len * 2;
+            uint64_t a = (uint64_t)in + k1;
+            uint64_t b = (uint64_t)in + 8;
+            uint64_t c = (uint64_t)(in + len - 8) * m;
+            uint64_t d = (uint64_t)(in + len - 16) * k2;
+            uint64_t e = rot32(a + b, 43) + rot32(c, 30) + d;
+            uint64_t f = a + rot32(b + k2, 18) + c;
+            uint64_t g = (e ^ f) * m;
+            g ^= (g >> 47);
+            uint64_t h = (f ^ g) * m;
+            h ^= (h >> 47);
+            b *= m;
+            return b;
+        }
+        if (len >= 8) {
+            uint64_t m = k2 + len * 2;
+            uint64_t a = (uint64_t)in + k2;
+            uint64_t b = (uint64_t)in + len - 8;
+            uint64_t c = rot32(b, 37) * m + a;
+            uint64_t d = (rot32(a, 25) + b) * m;
+            uint64_t e = (c ^ d) * m;
+            e ^= (e >> 47);
+            uint64_t f = (d ^ e) * m;
+            f ^= (f >> 47);
+            f *= m;
+            return f;
+        }
+        if (len >= 4) {
+            uint64_t m = k2 + len * 2;
+            uint64_t a = (uint64_t)in;
+            uint64_t b = len + (a << 3);
+            uint64_t c = (uint64_t)in + len - 4;
+            uint64_t d = (b ^ c) * m;
+            d ^= (d >> 47);
+            uint64_t e = (c ^ d) * m;
+            e ^= (e >> 47);
+            e *= m;
+            return e;
+        }
+        if (len > 0) {
+            uint8_t a = (uint8_t)(in)[0];
+            uint8_t b = (uint8_t)(in)[len >> 1];
+            uint8_t c = (uint8_t)(in)[len - 1];
+            uint32_t x = (uint32_t)(a) + ((uint32_t)(b) << 8);
+            uint32_t y = (uint32_t)(len) + ((uint32_t)(c) << 2);
+            uint64_t z =
+                    (uint64_t)x * (uint64_t)k2 ^ (uint64_t)y * (uint64_t)k0;
+            return (z ^ (z >> (uint64_t)47)) * k2;
+        }
+    }
+    uint32_t h = (uint32_t)len, g = c1 * h, f = g;
+    uint32_t a0 = rot32((*(uint32_t *)(in + len - 4)) * c1, 17) * c2;
+    uint32_t a1 = rot32((*(uint32_t *)(in + len - 8)) * c1, 17) * c2;
+    uint32_t a2 = rot32((*(uint32_t *)(in + len - 16)) * c1, 17) * c2;
+    uint32_t a3 = rot32((*(uint32_t *)(in + len - 12)) * c1, 17) * c2;
+    uint32_t a4 = rot32((*(uint32_t *)(in + len - 20)) * c1, 17) * c2;
+    h ^= a0;
+    h = rot32(h, 19);
+    h = h * 5 + 0xe6546b64;
+    h ^= a2;
+    h = rot32(h, 19);
+    h = h * 5 + 0xe6546b64;
+    g ^= a1;
+    g = rot32(g, 19);
+    g = g * 5 + 0xe6546b64;
+    g ^= a3;
+    g = rot32(g, 19);
+    g = g * 5 + 0xe6546b64;
+    f += a4;
+    f = rot32(f, 19);
+    f = f * 5 + 0xe6546b64;
+    size_t iters = (len - 1) / 20;
+    do {
+        uint32_t a0 = rot32(*(uint32_t *)(in)*c1, 17) * c2;
+        uint32_t a1 = *(uint32_t *)(in + 4);
+        uint32_t a2 = rot32(*(uint32_t *)(in + 8) * c1, 17) * c2;
+        uint32_t a3 = rot32(*(uint32_t *)(in + 12) * c1, 17) * c2;
+        uint32_t a4 = *(uint32_t *)(in + 16);
+        h ^= a0;
+        h = rot32(h, 18);
+        h = h * 5 + 0xe6546b64;
+        f += a1;
+        f = rot32(f, 19);
+        f = f * c1;
+        g += a2;
+        g = rot32(g, 18);
+        g = g * 5 + 0xe6546b64;
+        h ^= a3 + a1;
+        h = rot32(h, 19);
+        h = h * 5 + 0xe6546b64;
+        g ^= a4;
+        g = OSSwapInt32(g) * 5;
+        h += a4 * 5;
+        h = OSSwapInt32(h);
+        f += a0;
+        perm3(f, h, g);
+        in += 20;
+    } while (--iters != 0);
+    g = rot32(g, 11) * c1;
+    g = rot32(g, 17) * c1;
+    f = rot32(f, 11) * c1;
+    f = rot32(f, 17) * c1;
+    h = rot32(h + g, 19);
+    h = h * 5 + 0xe6546b64;
+    h = rot32(h, 17) * c1;
+    h = rot32(h + f, 19);
+    h = h * 5 + 0xe6546b64;
+    h = rot32(h, 17) * c1;
+    return h;
+}
+
+size_t default_hasher(void *table, const char *key, size_t key_length,
+                      size_t elem_size, size_t table_length)
+{
+    uint32_t index;
+    index = simple_hash_32((char *)key, key_length);
+    printf("(init)  %s->%u\n", key, index);
+    index = index & (table_length - 1);
+    printf("(mod)   %s->%u\n", key, index);
+    norm_map_entry_t *curr = (norm_map_entry_t *)table + index;
+    char k[16];
+    snprintf(k, 16, "%s", curr->kv);
+    printf("%s :: %lld\n", k, (uint64_t)curr->kv + NORM_MAP_MAX_KEY_LEN);
+    while (!memzcmp(curr, elem_size)) {
+        printf("(probe) %s->%u\n", key, index);
+        if (memcmp(curr->kv, key, key_length) == 0)
+            return index;
+        index = (index + 1) & (table_length - 1);
+        curr = (norm_map_entry_t *)table + index;
+    }
+    return index;
+}
 
 #endif /* ifdef NORM_DYN_DS_IMPLEMENTATION */
 
