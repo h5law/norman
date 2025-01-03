@@ -60,6 +60,13 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 
+#define NORM_MEM_BACKEND_LIBC_MALLOC 0
+#define NORM_MEM_BACKEND_MMAP 1
+
+#ifndef NORM_MEM_BACKEND
+#define NORM_MEM_BACKEND NORM_MEM_BACKEND_MMAP
+#endif // NORM_MEM_BACKEND
+
 #ifndef NORM_MEM_MAX_CAPACITY
 #define NORM_MEM_MAX_CAPACITY 655360
 #endif
@@ -68,8 +75,11 @@ enum {
     NORM_MEM_ZEROED_FLAG = 0x00000001,
     NORM_MEM_ALLOCED_FLAG = 0x00000002,
     NORM_MEM_FREE_FLAG = 0x00000004,
-    NORM_MEM_MARKED_FLAG = 0x00000008,
-    NORM_MEM_ZERO_OP_FLAG = 0x00000010,
+    // NORM_MEM_MARKED_FLAG = 0x00000008,
+};
+
+enum {
+    NORM_MEM_ZERO_REGION_OP = 0x00000001,
 };
 
 typedef struct norm_mem_header_t norm_mem_header_t;
@@ -80,6 +90,7 @@ struct norm_mem_header_t {
     uintptr_t next_free; // NULL unless status & NORM_MEM_FREE_FLAG > 0
     uintptr_t memory;
 };
+// } __attribute__((aligned(sizeof(uintptr_t))));
 
 typedef struct norm_mem_ctx_t norm_mem_ctx_t;
 struct norm_mem_ctx_t {
@@ -189,6 +200,7 @@ void *norm_mem_alloc(norm_mem_ctx_t *ctx, size_t size, uint32_t op_flags)
     if (free->data_size < (padded_length + sizeof(norm_mem_header_t))) {
         next_free_header = (norm_mem_header_t *)(void *)free->next_free;
         prev->next_free = free->next_free;
+        ctx->used -= sizeof(norm_mem_header_t);
     } else {
         next_free_header =
                 (norm_mem_header_t *)(void *)((unsigned char *)free->memory +
@@ -222,7 +234,7 @@ void *norm_mem_alloc(norm_mem_ctx_t *ctx, size_t size, uint32_t op_flags)
     new_mem_header->status =
             (free->status & NORM_MEM_ZEROED_FLAG) | NORM_MEM_ALLOCED_FLAG;
 
-    if (op_flags & NORM_MEM_ZERO_OP_FLAG) {
+    if (op_flags & NORM_MEM_ZERO_REGION_OP) {
         new_mem_header->status |= NORM_MEM_ZEROED_FLAG;
         memset((unsigned char *)(void *)(new_mem_header->memory), 0,
                new_mem_header->data_size + new_mem_header->padding_size);
@@ -238,7 +250,7 @@ void *norm_mem_free(norm_mem_ctx_t *ctx, uintptr_t memory, uint32_t op_flags)
                                                   *)((unsigned char *)(memory) -
                                                      sizeof(norm_mem_header_t));
     header->status ^= NORM_MEM_FREE_FLAG | NORM_MEM_ALLOCED_FLAG;
-    header->data_size = header->data_size + header->padding_size;
+    header->data_size += header->padding_size;
     header->padding_size = 0;
     ctx->used -= header->data_size;
     // printf("(free) 0x%-lx\n", (uintptr_t)(void *)header);
@@ -280,7 +292,7 @@ void *norm_mem_free(norm_mem_ctx_t *ctx, uintptr_t memory, uint32_t op_flags)
         ctx->used -= sizeof(norm_mem_header_t);
     }
 
-    if (op_flags & NORM_MEM_ZERO_OP_FLAG) {
+    if (op_flags & NORM_MEM_ZERO_REGION_OP) {
         header->status |= NORM_MEM_ZEROED_FLAG;
         memset((unsigned char *)(void *)(header->memory), 0, header->data_size);
     }
