@@ -44,12 +44,11 @@ harry@h5law.com
                         `''---''``       `.
 
 TODO:
-  -> Define a underlying data structure to back the heap/arena and its metadata
-    (map?)
-  -> Support multiple arenas/pools/heaps not a single global instance
+  -> Look into potentially supporting dynamic (page-aligned) memory backends
+     (mmap/malloc/sbrk/...) that grow like vectors (./norm_dyn.h)
+  -> Add support to customise the memory backend (mmap/malloc/sbrk/...)
  */
 
-#include <sys/_types/_uintptr_t.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
