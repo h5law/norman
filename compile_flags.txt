@@ -3,4 +3,3 @@
 -Wall
 -Werror
 -Wpedantic
--Wintrinsics-std

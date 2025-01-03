@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-xc -std=c99 -Wall -Werror -Wpedantic -Wintrinsics-std
+CFLAGS=-xc -std=c99 -Wall -Werror -Wpedantic
 
 TEST_DIR=tests
 TEST_BINS=dyn mem

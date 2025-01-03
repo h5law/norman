@@ -21,16 +21,87 @@ Harry Law
 harry@h5law.com
  */
 
+#include <assert.h>
 #include <stdlib.h>
 
 #define NORM_MEM_IMPLEMENTATION 1
 #define NORM_MEM_MAX_CAPACITY 17000
 #include "../norm_mallogator.h"
 
+#define NORM_MEM_TEST_PRINT_OUT 0
+
+void print_mem(norm_mem_ctx_t *ctx)
+{
+    if (NORM_MEM_TEST_PRINT_OUT != 1)
+        return;
+    norm_mem_header_t *curr = (norm_mem_header_t *)(void *)ctx->memory;
+    if (curr && ctx->free == ctx->memory) {
+        printf("(empty)   0x%-lx [%ld]\n", (uintptr_t)(void *)curr,
+               curr->data_size);
+        curr = NULL;
+    }
+    while (curr != NULL) {
+        size_t offset = 0;
+        if (curr->status & NORM_MEM_FREE_FLAG) {
+            printf("(free)    0x%-lx [%ld]\n", (uintptr_t)(void *)curr,
+                   curr->data_size);
+            offset = curr->data_size;
+            if (curr->next_free == (uintptr_t)(void *)NULL)
+                break;
+        } else if (curr->status & NORM_MEM_ALLOCED_FLAG) {
+            printf("(alloced) 0x%-lx [%ld + %ld]\n", (uintptr_t)(void *)curr,
+                   curr->data_size, curr->padding_size);
+            offset = curr->data_size + curr->padding_size;
+        }
+        curr = (norm_mem_header_t *)(void *)((unsigned char *)(curr->memory) +
+                                             offset);
+    }
+    printf("(memory)  end of allocator headers\n          [cap %ld  used "
+           "%ld]\n\n",
+           ctx->capacity, ctx->used);
+    return;
+}
+
 int main(int argc, char *argv[])
 {
     norm_mem_ctx_t default_ctx = {0};
-    norm_mem_init(&default_ctx, 1024);
+    assert(norm_mem_init(&default_ctx, 1024) == NORM_MEM_ERR_OKAY);
+    print_mem(&default_ctx);
+
+    void *mem1 = norm_mem_alloc(&default_ctx, 1024, NORM_MEM_ZERO_OP_FLAG);
+    assert(mem1 != NULL);
+    print_mem(&default_ctx);
+
+    void *mem2 = norm_mem_alloc(&default_ctx, 756, NORM_MEM_ZERO_OP_FLAG);
+    assert(mem2 != NULL);
+    print_mem(&default_ctx);
+
+    void *mem3 = norm_mem_alloc(&default_ctx, 506, NORM_MEM_ZERO_OP_FLAG);
+    assert(mem3 != NULL);
+    print_mem(&default_ctx);
+
+    norm_mem_free(&default_ctx, (uintptr_t)mem2, NORM_MEM_ZERO_OP_FLAG);
+    print_mem(&default_ctx);
+
+    void *mem4 = norm_mem_alloc(&default_ctx, 203, NORM_MEM_ZERO_OP_FLAG);
+    assert(mem4 != NULL);
+    print_mem(&default_ctx);
+
+    void *mem5 = norm_mem_alloc(&default_ctx, 1123, NORM_MEM_ZERO_OP_FLAG);
+    assert(mem5 != NULL);
+    print_mem(&default_ctx);
+
+    void *mem6 = norm_mem_alloc(&default_ctx, 0, NORM_MEM_ZERO_OP_FLAG);
+    assert(mem6 != NULL);
+    print_mem(&default_ctx);
+
+    norm_mem_free(&default_ctx, (uintptr_t)mem3, NORM_MEM_ZERO_OP_FLAG);
+    print_mem(&default_ctx);
+
+    norm_mem_free(&default_ctx, (uintptr_t)mem5, NORM_MEM_ZERO_OP_FLAG);
+    print_mem(&default_ctx);
+
+    assert(norm_mem_deinit(&default_ctx) == NORM_MEM_ERR_OKAY);
     return EXIT_SUCCESS;
 }
 
