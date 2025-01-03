@@ -135,7 +135,9 @@ static inline size_t norm__mem_align_to_pagesize(size_t unaligned)
 
 static inline size_t norm__mem_pointer_align(size_t unaligned)
 {
-    return ((unaligned & (sizeof(uintptr_t) - 1)) + unaligned);
+    size_t rem = unaligned & (sizeof(uintptr_t) - 1);
+    size_t diff = rem > 0 ? sizeof(uintptr_t) - rem : 0;
+    return (diff + unaligned);
 }
 
 void *norm_mem_init(norm_mem_ctx_t *ctx, size_t size)
