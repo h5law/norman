@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024 Harry Law <h5law>
+Copyright (c) 2025 Harry Law <h5law>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -16,16 +16,11 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
-
-Harry Law
-harry@h5law.com
  */
 
 #include <assert.h>
 #include <stdlib.h>
 
-#define NORM_MEM_IMPLEMENTATION 1
-#define NORM_MEM_MAX_CAPACITY 17000
 #include "../norm_mallogator.h"
 
 #define NORM_MEM_TEST_PRINT_OUT 1
@@ -35,10 +30,10 @@ void print_mem(norm_mem_ctx_t *ctx)
     if (NORM_MEM_TEST_PRINT_OUT != 1)
         return;
     printf("(memory)  free list head:    (ptr: 0x%016lx)\n", ctx->free);
-    norm_mem_header_t *curr = (norm_mem_header_t *)(void *)ctx->memory;
+    norm_mem_header_t *curr = ( norm_mem_header_t * )( void * )ctx->memory;
     if (curr && ctx->free == ctx->memory &&
-        curr->next_free == (uintptr_t)(void *)NULL) {
-        printf("(empty)   0x%-lx [%ld]\n", (uintptr_t)(void *)curr,
+        curr->next_free == ( uintptr_t )( void * )NULL) {
+        printf("(empty)   0x%-lx [%ld]\n", ( uintptr_t )( void * )curr,
                curr->data_size);
         curr = NULL;
     }
@@ -46,18 +41,19 @@ void print_mem(norm_mem_ctx_t *ctx)
         size_t offset = 0;
         if (curr->status & NORM_MEM_FREE_FLAG) {
             printf("(free)    0x%016lx (mem: 0x%016lx) [%ld]\n",
-                   (uintptr_t)(void *)curr, curr->memory, curr->data_size);
+                   ( uintptr_t )( void * )curr, curr->memory, curr->data_size);
             offset = curr->data_size;
-            if (curr->next_free == (uintptr_t)(void *)NULL)
+            if (curr->next_free == ( uintptr_t )( void * )NULL)
                 break;
         } else if (curr->status & NORM_MEM_ALLOCED_FLAG) {
             printf("(alloced) 0x%016lx (mem: 0x%016lx) [%ld + %zu]\n",
-                   (uintptr_t)(void *)curr, curr->memory, curr->data_size,
+                   ( uintptr_t )( void * )curr, curr->memory, curr->data_size,
                    curr->padding_size);
             offset = curr->data_size + curr->padding_size;
         }
-        curr = (norm_mem_header_t *)(void *)((unsigned char *)(curr->memory) +
-                                             offset);
+        curr = ( norm_mem_header_t
+                         * )( void * )(( unsigned char * )(curr->memory) +
+                                       offset);
     }
     printf("(memory)  end of allocator headers\n          [cap %ld  used "
            "%ld]\n\n",
@@ -83,7 +79,7 @@ int main(int argc, char *argv[])
     assert(mem3 != NULL);
     print_mem(&default_ctx);
 
-    norm_mem_free(&default_ctx, (uintptr_t)mem2, NORM_MEM_ZERO_REGION_OP);
+    norm_mem_free(&default_ctx, ( uintptr_t )mem2, NORM_MEM_ZERO_REGION_OP);
     print_mem(&default_ctx);
 
     void *mem4 = norm_mem_alloc(&default_ctx, 203, NORM_MEM_ZERO_REGION_OP);
@@ -98,10 +94,10 @@ int main(int argc, char *argv[])
     assert(mem6 != NULL);
     print_mem(&default_ctx);
 
-    norm_mem_free(&default_ctx, (uintptr_t)mem3, NORM_MEM_ZERO_REGION_OP);
+    norm_mem_free(&default_ctx, ( uintptr_t )mem3, NORM_MEM_ZERO_REGION_OP);
     print_mem(&default_ctx);
 
-    norm_mem_free(&default_ctx, (uintptr_t)mem5, NORM_MEM_ZERO_REGION_OP);
+    norm_mem_free(&default_ctx, ( uintptr_t )mem5, NORM_MEM_ZERO_REGION_OP);
     print_mem(&default_ctx);
 
     void *nmem1, *nmem2; // *nmem3, *nmem4, *nmem5, *nmem6, *nmem7, *nmem8;
@@ -113,13 +109,13 @@ int main(int argc, char *argv[])
     snprintf(nmem2, 56, "memort region 2 allocated");
     print_mem(&default_ctx);
 
-    norm_mem_free(&default_ctx, (uintptr_t)mem6, NORM_MEM_ZERO_REGION_OP);
+    norm_mem_free(&default_ctx, ( uintptr_t )mem6, NORM_MEM_ZERO_REGION_OP);
     print_mem(&default_ctx);
 
-    norm_mem_free(&default_ctx, (uintptr_t)mem1, NORM_MEM_ZERO_REGION_OP);
+    norm_mem_free(&default_ctx, ( uintptr_t )mem1, NORM_MEM_ZERO_REGION_OP);
     print_mem(&default_ctx);
 
-    norm_mem_free(&default_ctx, (uintptr_t)mem4, NORM_MEM_ZERO_REGION_OP);
+    norm_mem_free(&default_ctx, ( uintptr_t )mem4, NORM_MEM_ZERO_REGION_OP);
     print_mem(&default_ctx);
 
     assert(norm_mem_deinit(&default_ctx) == NORM_MEM_ERR_OKAY);

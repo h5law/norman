@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/utils.h"
+#include "utils.h"
 
 int memvcmp(void *memory, unsigned char val, size_t size)
 {

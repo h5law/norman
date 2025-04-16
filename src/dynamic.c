@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/dynamic.h"
-#include "../include/utils.h"
+#include "dynamic.h"
+#include "utils.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //                        Dynamic Array/Vector Methods                        //

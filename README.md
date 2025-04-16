@@ -1,11 +1,8 @@
 # norman
 
-`norman` is a C (C99) collection of single header-file libraries implementing
-various different utilities with zero dependencies, so as to expand the C
-standard library while not introducing any external (besides the header-file)
-dependencies.
+`norman` is a pre-alpha implementation of a C standard library and eventually
+fully compliant `libc` implementation.
 
-## Libraries
-
-- [`norm_dyn.h`](./norm_dyn.h): Dynamic data structures (vector and hashmap)
-- [`norm_mallogator.h`](./norm_mallogator.h): Dynamic memory allocator
+It is written from scratch with no external dependencies, currently `stdlib.h`
+is used in some places but this will eventually be replaced when more features
+have been added.

@@ -3,7 +3,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "../include/mallogator.h"
+#include "mallogator.h"
 
 static inline size_t norm__mem_align_to_pagesize(size_t unaligned)
 {
