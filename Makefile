@@ -17,7 +17,7 @@ clean: always
 test: always clean $(addprefix $(TEST_DIR)/, $(TEST_BINS))
 
 $(TEST_DIR)/dyn:
-	$(CC) $(CFLAGS) -lxxhash -o $(TEST_DIR)/dyn_test.o $(TEST_DIR)/dyn_simple.c
+	$(CC) $(CFLAGS) -lxxhash -L/opt/homebrew/opt/xxhash/lib -I/opt/homebrew/opt/xxhash/include -o $(TEST_DIR)/dyn_test.o $(TEST_DIR)/dyn_simple.c
 
 $(TEST_DIR)/mem:
 	$(CC) $(CFLAGS) -o $(TEST_DIR)/mem_test.o $(TEST_DIR)/mem_simple.c

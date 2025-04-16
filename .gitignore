@@ -1,2 +1,2 @@
+.DS_Store
 tests/*.o
-norm_misc_artifacts.h

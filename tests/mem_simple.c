@@ -28,7 +28,7 @@ harry@h5law.com
 #define NORM_MEM_MAX_CAPACITY 17000
 #include "../norm_mallogator.h"
 
-#define NORM_MEM_TEST_PRINT_OUT 0
+#define NORM_MEM_TEST_PRINT_OUT 1
 
 void print_mem(norm_mem_ctx_t *ctx)
 {

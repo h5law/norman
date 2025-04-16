@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024 Harry Law <h5law>
+Copyright (c) 2025 h5law <dev@h5law.com>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -11,43 +11,26 @@ freely, subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not
    claim that you wrote the original software. If you use this software
-   in a product, an acknowledgment in the product documentation would be
+   in a product, an acknowledgement in the product documentation would be
    appreciated but is not required.
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
-
-Harry Law
-harry@h5law.com
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* LIBRARY DESCRIPTION: 21-24
+ * General shared utility types, methods and other shared artifacts for the
+ * use throughout the norm library.
+ */
 
 #ifndef NORM_UTILS_H
 #define NORM_UTILS_H
 
 #include <sys/types.h>
 
-extern inline int memvcmp(void *memory, unsigned char val, size_t size);
+int memvcmp(void *memory, unsigned char val, size_t size);
+void assertf(int eval, char *desc);
 
-#endif /* ifndef NORM_UTILS_H */
-
-#ifdef NORM_UTILS_IMPLEMENTATION
-
-#include <string.h>
-
-extern inline int memvcmp(void *memory, unsigned char val, size_t size)
-{
-    unsigned char *mm = (unsigned char *)memory;
-    return (*mm == val) && memcmp(mm, mm + 1, size - 1) == 0;
-}
-
-#endif /* ifdef NORM_UTILS_IMPLEMENTATION */
-
-#ifdef __cplusplus
-} /* extern "C" */
 #endif
 
-// vim: ft=c ts=4 sts=4 sw=4 cin et
+// vim: ft=c ts=4 sts=4 sw=4 cin et nospell
