@@ -85,7 +85,6 @@ struct norm_mem_header_t {
     uintptr_t next_free; // NULL unless status & NORM_MEM_FREE_FLAG > 0
     uintptr_t memory;
 };
-// } __attribute__((aligned(sizeof(uintptr_t))));
 
 typedef struct norm_mem_ctx_t norm_mem_ctx_t;
 struct norm_mem_ctx_t {
@@ -105,6 +104,6 @@ void *norm_mem_alloc(norm_mem_ctx_t *ctx, size_t size_bytes, uint32_t op_flags);
 void *norm_mem_free(norm_mem_ctx_t *ctx, uintptr_t memory, uint32_t op_flags);
 void *norm_mem_deinit(norm_mem_ctx_t *ctx);
 
-#endif
+#endif // NORM_MEM_H
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell
