@@ -33,22 +33,16 @@ freely, subject to the following restrictions:
 typedef __SIZE_TYPE__ size_t;
 #endif /* ifndef __size_t */
 
-#ifdef __x86_64__
-#define SYS_READ 0
-#define SYS_WRITE 1
-#define SYS_OPEN 2
-#define SYS_CLOSE 3
-#define SYS_BRK 12
-#define SYS_ACCESS 21
-#define SYS_FORK 57
-#define SYS_EXECVE 59
-#define SYS_EXIT 60
-#define SYS_WAIT4 61
-#define SYS_CHDIR 80
-#define SYS_NANOSLEEP 35
-// ...
-#endif /* ifdef __x86_64__ */
 // TODO: Add other architectures and call numbers
+#define SYS_SYSCALL 0
+#define SYS_EXIT 1
+#define SYS_FORK 2
+#define SYS_READ 3
+#define SYS_WRITE 4
+#define SYS_OPEN 5
+#define SYS_CLOSE 6
+#define SYS_WAIT4 7
+// ...
 
 #ifndef BUF_SIZE
 #define BUF_SIZE 4096
@@ -81,10 +75,12 @@ int __main(int argc, char **argv);
 
 // defined in the assembler
 extern int syscall(int num, ...);
-extern void sys_exit(int code);
+extern void sys_exit(int status);
 extern int sys_fork(void);
 extern int sys_read(unsigned int fd, char *buf, size_t buf_size);
 extern int sys_write(unsigned int fd, const char *buf, size_t buf_size);
+extern int sys_open(const char *path, int flag, ...);
+extern int sys_close(unsigned int fd);
 
 #endif /* ifndef NORM_SYS_H */
 
