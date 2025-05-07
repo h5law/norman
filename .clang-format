@@ -24,4 +24,9 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignTrailingComments: true
+
 MaxEmptyLinesToKeep: 1

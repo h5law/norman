@@ -45,9 +45,9 @@ norm_vector_t norm_vector_init(size_t min_capacity, double load_factor,
     if (array == NULL)
         return vec;
 
-    vec.capacity = min_capacity;
+    vec.capacity    = min_capacity;
     vec.load_factor = load_factor;
-    vec.array = array;
+    vec.array       = array;
 
     return vec;
 }
@@ -70,14 +70,14 @@ int norm_vector_spos(norm_vector_t *vec, size_t index, void *elem,
     if (memvcmp((( char * )(vec->array)) + (index * elem_size),
                 ( unsigned char )0, elem_size)) {
         int add_err = CHECKINT_NO_ERROR;
-        new_size = check_int32_add(vec->size, 1, &add_err);
+        new_size    = check_int32_add(vec->size, 1, &add_err);
         if (add_err != CHECKINT_NO_ERROR) {
             return NORM_DYN_ERR_OFLOW;
         }
     }
     if (( double )new_size >= ( double )vec->capacity * vec->load_factor) {
-        void *new_arr;
-        int mul_err = CHECKINT_NO_ERROR;
+        void  *new_arr;
+        int    mul_err = CHECKINT_NO_ERROR;
         size_t new_cap;
         new_cap = check_int64_mul(vec->capacity, 2, &mul_err);
         if (mul_err != CHECKINT_NO_ERROR)
@@ -87,7 +87,7 @@ int norm_vector_spos(norm_vector_t *vec, size_t index, void *elem,
             return NORM_DYN_ERR_ALLOC;
         memmove(new_arr, ( char * )vec->array, vec->capacity * elem_size);
         free(vec->array);
-        vec->array = new_arr;
+        vec->array    = new_arr;
         vec->capacity = new_cap;
     }
     memmove(( char * )vec->array + (index * elem_size), elem, elem_size);
@@ -126,7 +126,7 @@ int norm_vector_compact(norm_vector_t *vec, size_t elem_size)
         return NORM_DYN_ERR_IARGS;
 
     int curr, left, right;
-    left = 0;
+    left  = 0;
     right = 0;
     size_t lsize, rsize;
     lsize = 0;
@@ -143,8 +143,8 @@ int norm_vector_compact(norm_vector_t *vec, size_t elem_size)
             continue;
         }
         right = left + (lsize / elem_size);
-        curr = memvcmp((( char * )(vec->array)) + (right * elem_size) + rsize,
-                       ( unsigned char )0, elem_size);
+        curr  = memvcmp((( char * )(vec->array)) + (right * elem_size) + rsize,
+                        ( unsigned char )0, elem_size);
         if (!curr && right + (rsize / elem_size) < vec->end_ptr) {
             rsize += elem_size;
             continue;
@@ -169,16 +169,16 @@ int norm_vector_compact(norm_vector_t *vec, size_t elem_size)
 norm_vector_t norm_vector_clone(norm_vector_t *vec, size_t elem_size)
 {
     norm_vector_t dup = {0};
-    void *array;
+    void         *array;
     array = calloc(vec->capacity, elem_size);
     if (array == NULL)
         return dup;
     memmove(( char * )array, ( char * )vec->array, vec->capacity * elem_size);
-    dup.capacity = vec->capacity;
-    dup.size = vec->size;
-    dup.end_ptr = vec->end_ptr;
+    dup.capacity    = vec->capacity;
+    dup.size        = vec->size;
+    dup.end_ptr     = vec->end_ptr;
     dup.load_factor = vec->load_factor;
-    dup.array = array;
+    dup.array       = array;
     return dup;
 }
 
@@ -187,7 +187,7 @@ int norm_vector_empty(norm_vector_t *vec, size_t elem_size)
     if (!vec || !vec->array || vec->size == 0)
         return NORM_DYN_ERR_IARGS;
     memset(( char * )vec->array, 0, vec->capacity * elem_size);
-    vec->size = 0;
+    vec->size    = 0;
     vec->end_ptr = 0;
     return NORM_DYN_ERR_OKAY;
 }
@@ -208,11 +208,11 @@ norm_vector_t norm_vector_concat(norm_vector_t *vec1, norm_vector_t *vec2,
     memmove(( char * )array + (vec1->capacity * elem_size),
             ( char * )vec2->array, vec2->capacity * elem_size);
 
-    new.size = vec1->size + vec2->size;
-    new.capacity = vec1->capacity + vec2->capacity;
-    new.end_ptr = vec1->capacity + vec2->end_ptr - 1;
+    new.size        = vec1->size + vec2->size;
+    new.capacity    = vec1->capacity + vec2->capacity;
+    new.end_ptr     = vec1->capacity + vec2->end_ptr - 1;
     new.load_factor = fmin(vec1->load_factor, vec2->load_factor);
-    new.array = array;
+    new.array       = array;
 
     return new;
 }
@@ -228,18 +228,18 @@ int norm_vector_resize(norm_vector_t *vec, size_t new_capacity,
     if (new_array == NULL)
         return NORM_DYN_ERR_ALLOC;
 
-    int x = new_capacity;
-    int y = vec->capacity;
+    int x   = new_capacity;
+    int y   = vec->capacity;
     int len = x > y ? y : x;
     memmove(new_array, ( char * )vec->array, len * elem_size);
     free(vec->array);
 
     if (new_capacity < vec->size) {
-        vec->size = new_capacity;
+        vec->size    = new_capacity;
         vec->end_ptr = new_capacity;
     }
 
-    vec->array = new_array;
+    vec->array    = new_array;
     vec->capacity = new_capacity;
 
     return NORM_DYN_ERR_OKAY;
@@ -289,9 +289,9 @@ norm_map_t norm_map_init(size_t min_capacity, double load_factor,
     vec = norm_vector_init(cap2, load_factor, norm__map_entry_size(elem_size));
     if (vec.capacity != cap2)
         return map;
-    map.table = vec;
+    map.table     = vec;
     map.hasher_fn = hasher_fn;
-    map.probe_fn = probe_fn;
+    map.probe_fn  = probe_fn;
     return map;
 }
 
@@ -300,7 +300,7 @@ int norm_map_free(norm_map_t *map)
     if (!map)
         return NORM_DYN_ERR_IARGS;
     int res = NORM_DYN_ERR_OKAY;
-    res = norm_vector_free(&(map->table));
+    res     = norm_vector_free(&(map->table));
     if (res != NORM_DYN_ERR_OKAY)
         return res;
     memset(map, 0, sizeof(norm_map_t));
@@ -313,10 +313,10 @@ int norm_map_set(norm_map_t *map, const char *key, void *elem,
     if (!map || key_length <= 0 || key_length > NORM_MAP_MAX_KEY_LEN ||
         elem_size <= 0)
         return NORM_DYN_ERR_IARGS;
-    int res = NORM_DYN_ERR_OKAY;
+    int    res = NORM_DYN_ERR_OKAY;
     size_t index, entry_size, start_table_cap;
     start_table_cap = map->table.capacity;
-    entry_size = norm__map_entry_size(elem_size);
+    entry_size      = norm__map_entry_size(elem_size);
     index = map->probe_fn(map->hasher_fn, ( void * )(map->table.array), key,
                           key_length, entry_size, map->table.capacity);
     if (index == ~(( size_t )0))
@@ -326,7 +326,7 @@ int norm_map_set(norm_map_t *map, const char *key, void *elem,
     if (entry == NULL)
         return NORM_DYN_ERR_ALLOC;
     entry->key_length = key_length;
-    entry->elem_size = elem_size;
+    entry->elem_size  = elem_size;
     memmove(entry->kv, key, key_length);
     memmove((( char * )(entry->kv)) + NORM_MAP_MAX_KEY_LEN, elem, elem_size);
     res = norm_vector_spos(&(map->table), index, entry, entry_size);
@@ -378,7 +378,7 @@ int norm_map_clear(norm_map_t *map, size_t elem_size)
 int norm_map_rehash(norm_map_t *map, size_t elem_size)
 {
     size_t entry_size;
-    entry_size = norm__map_entry_size(elem_size);
+    entry_size    = norm__map_entry_size(elem_size);
     char *new_arr = calloc(map->table.capacity, entry_size);
     if (new_arr == NULL)
         return NORM_DYN_ERR_ALLOC;
@@ -399,7 +399,7 @@ int norm_map_rehash(norm_map_t *map, size_t elem_size)
         memmove(new_arr + (index * entry_size), entry, entry_size);
     }
     free(map->table.array);
-    map->table.array = new_arr;
+    map->table.array   = new_arr;
     map->table.end_ptr = end_ptr + 1;
     return NORM_DYN_ERR_OKAY;
 }
@@ -412,8 +412,8 @@ size_t norm_map_linear_probe(norm_map_hasher_fn hasher_fn, void *table,
                              size_t elem_size, size_t table_length)
 {
     size_t index;
-    index = hasher_fn(key, key_length);
-    index = index & (table_length - 1);
+    index                  = hasher_fn(key, key_length);
+    index                  = index & (table_length - 1);
     norm_map_entry_t *curr = calloc(1, elem_size);
     if (curr == NULL)
         return ~(( size_t )0);

@@ -35,7 +35,7 @@ static inline size_t norm__mem_align_to_pagesize(size_t unaligned)
 
 static inline size_t norm__mem_pointer_align(size_t unaligned)
 {
-    size_t rem = unaligned & (sizeof(uintptr_t) - 1);
+    size_t rem  = unaligned & (sizeof(uintptr_t) - 1);
     size_t diff = rem > 0 ? sizeof(uintptr_t) - rem : 0;
     return (diff + unaligned);
 }
@@ -45,7 +45,7 @@ void *norm_mem_init(norm_mem_ctx_t *ctx, size_t size)
     if (!ctx)
         return NORM_MEM_ERR_NO_CTX;
 
-    void *memory;
+    void  *memory;
     size_t width;
     width = size == 0 ? norm__mem_align_to_pagesize(NORM_MEM_MAX_CAPACITY)
                       : norm__mem_align_to_pagesize(size);
@@ -56,18 +56,18 @@ void *norm_mem_init(norm_mem_ctx_t *ctx, size_t size)
         return NORM_MEM_ERR_MMAP;
 
     norm_mem_header_t free;
-    free.status = NORM_MEM_FREE_FLAG | NORM_MEM_ZEROED_FLAG;
-    free.data_size = width - sizeof(norm_mem_header_t);
+    free.status       = NORM_MEM_FREE_FLAG | NORM_MEM_ZEROED_FLAG;
+    free.data_size    = width - sizeof(norm_mem_header_t);
     free.padding_size = 0;
-    free.next_free = ( uintptr_t )NULL;
-    free.memory = ( uintptr_t )( void * )(( unsigned char * )memory +
+    free.next_free    = ( uintptr_t )NULL;
+    free.memory       = ( uintptr_t )( void * )(( unsigned char * )memory +
                                           sizeof(norm_mem_header_t));
     memmove((( char * )(memory)), &free, sizeof(norm_mem_header_t));
 
     ctx->capacity = width;
-    ctx->used = sizeof(norm_mem_header_t);
-    ctx->free = ( uintptr_t )( void * )memory;
-    ctx->memory = ( uintptr_t )( void * )memory;
+    ctx->used     = sizeof(norm_mem_header_t);
+    ctx->free     = ( uintptr_t )( void * )memory;
+    ctx->memory   = ( uintptr_t )( void * )memory;
 
     return NORM_MEM_ERR_OKAY;
 }
@@ -100,7 +100,7 @@ void *norm_mem_alloc(norm_mem_ctx_t *ctx, size_t size, uint32_t op_flags)
     norm_mem_header_t *next_free_header = NULL;
     if (free->data_size < (padded_length + sizeof(norm_mem_header_t))) {
         next_free_header = ( norm_mem_header_t * )( void * )free->next_free;
-        prev->next_free = free->next_free;
+        prev->next_free  = free->next_free;
         ctx->used -= sizeof(norm_mem_header_t);
     } else {
         next_free_header =
@@ -129,11 +129,11 @@ void *norm_mem_alloc(norm_mem_ctx_t *ctx, size_t size, uint32_t op_flags)
     ctx->used += padded_length;
 
     norm_mem_header_t *new_mem_header = free;
-    size_t padding_width;
-    padding_width = padded_length - size;
-    new_mem_header->data_size = size;
+    size_t             padding_width;
+    padding_width                = padded_length - size;
+    new_mem_header->data_size    = size;
     new_mem_header->padding_size = padding_width;
-    new_mem_header->next_free = ( uintptr_t )( void * )NULL;
+    new_mem_header->next_free    = ( uintptr_t )( void * )NULL;
     new_mem_header->status =
             (free->status & NORM_MEM_ZEROED_FLAG) | NORM_MEM_ALLOCED_FLAG;
 
@@ -162,7 +162,7 @@ void *norm_mem_free(norm_mem_ctx_t *ctx, uintptr_t memory, uint32_t op_flags)
         ctx->free = ( uintptr_t )( void * )header;
     else if (ctx->free > ( uintptr_t )( void * )header) {
         header->next_free = ctx->free;
-        ctx->free = ( uintptr_t )( void * )header;
+        ctx->free         = ( uintptr_t )( void * )header;
     } else {
         norm_mem_header_t *prev = ( norm_mem_header_t * )( void * )ctx->free;
         while (prev && prev->next_free < ( uintptr_t )( void * )header) {
@@ -174,7 +174,7 @@ void *norm_mem_free(norm_mem_ctx_t *ctx, uintptr_t memory, uint32_t op_flags)
                 break;
         }
         header->next_free = prev->next_free;
-        prev->next_free = ( uintptr_t )( void * )header;
+        prev->next_free   = ( uintptr_t )( void * )header;
 
         if (( uintptr_t )( void * )((( unsigned char
                                                * )( void * )(prev->memory)) +
