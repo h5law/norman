@@ -1,18 +1,19 @@
-; .global __start
-; .type   __start, @function
-.global __syscall
-.globl  __cerror
+.global syscall
 
 .text
 
-; __start:
-;     mov 0x0(%rsp), %rdi
-;     lea 0x8(%rsp), %rsi
-;     call __main
-;     mov $1, %rax
-;     __syscall
+_start:
+    ldr x0, [sp]
+    add x1, sp, #8
 
-__syscall:
+    str lr, [sp, #-16]!
+    bl _main
+    ldr lr, [sp], #16
+
+    mov x8, #1
+    svc #0
+
+syscall:
     /* Move syscall number into x0 from x8 */
     mov     x8, x0
     /* Shift syscall arguments down one register from x1... to x0... */
@@ -24,20 +25,26 @@ __syscall:
     mov     x5, x6
     svc     #0
 
-    /* Check is x0 negative (x0 + 0 < 0) */
-    cmn     x0, #0
-    /* Branch to __cerror if negative flag set */
-    ; b.mi    __cerror
+    /* Check is x0 negative (x0 + 4096 < 0) */
+    cmn     x0, #(4095 + 1)
+    cneg    x0, x0, hi
+    b.hi    __set_errno_internal
 
-    /* Return error code stored in x0 */
     ret
 
-/*
- * Error handler - sets errno and returns -1
- */
-; __cerror:
-;     neg     x0, x0                  /* Make error code positive */
-;     adrp    x1, errno               /* Load address of errno */
-;     str     w0, [x1, :lo12:errno]   /* Store error code in errno */
-;     mov     x0, #-1                 /* Return -1 */
-;     ret
+__set_errno_internal:
+    mov x0, x0
+    bl _set_errno
+    ret
+    ; sub sp, sp, #16
+    ;
+    ; str w0, [sp, #12]
+    ; ldr w8, [sp, #12]
+    ;
+    ; adrp x9, _errno@GOTPAGE
+    ; ldr x9, [x9, _errno@GOTPAGEOFF]
+    ;
+    ; str w8, [x9]
+    ; add sp, sp, #16
+    ;
+    ; ret

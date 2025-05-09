@@ -18,19 +18,42 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-/* LIBRARY DESCRIPTION: 21-24
- * General shared utility types, methods and other shared artifacts for the
- * use throughout the norm library.
- */
+#include "stdio.h"
 
-#ifndef NORM_UTILS_H
-#define NORM_UTILS_H
+int open(const char *path, int flag, ...)
+{
+    int mode = O_RDONLY;
 
-#include "system.h"
+    if (flag & O_CREAT) {
+        va_list ap;
+        mode |= va_arg(ap, int);
+        va_end(ap);
+    }
 
-int  memvcmp(void *memory, unsigned char val, size_t size);
-void assertf(int eval, char *desc);
+    return syscall(SYS_OPEN, path, flag, mode);
+}
 
-#endif
+int close(unsigned int fd) { return syscall(SYS_CLOSE, fd); }
 
-// vim: ft=c ts=4 sts=4 sw=4 cin et nospell
+int read(unsigned int fd, char *buf, size_t count)
+{
+    return syscall(SYS_READ, fd, buf, count);
+}
+
+int write(unsigned int fd, const char *buf, size_t count)
+{
+    return syscall(SYS_WRITE, fd, buf, count);
+}
+
+int print(char const *f)
+{
+    size_t len = 0;
+
+    while (f[len] != '\0') {
+        ++len;
+    }
+
+    return write(STDOUT_FILENO, f, len);
+}
+
+// vim: ft=c ts=4 sts=4 sw=4 et ai cin

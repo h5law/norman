@@ -1,5 +1,6 @@
 -xc
 -std=c99
+-target=aarch64-unknown-none
 -Wall
 -Werror
 -Wpedantic

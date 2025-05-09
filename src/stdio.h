@@ -18,19 +18,30 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-/* LIBRARY DESCRIPTION: 21-24
- * General shared utility types, methods and other shared artifacts for the
- * use throughout the norm library.
- */
-
-#ifndef NORM_UTILS_H
-#define NORM_UTILS_H
+#ifndef NORM_STDIO_H
+#define NORM_STDIO_H
 
 #include "system.h"
 
-int  memvcmp(void *memory, unsigned char val, size_t size);
-void assertf(int eval, char *desc);
+#define STDIN_FILENO  0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 
-#endif
+// typedef struct __sFILE {
+//     // ...
+// } FILE;
+typedef void FILE;
 
-// vim: ft=c ts=4 sts=4 sw=4 cin et nospell
+extern FILE *stdin;
+extern FILE *stdout;
+extern FILE *stderr;
+
+int read(unsigned int fd, char *buf, size_t buf_size);
+int write(unsigned int fd, const char *buf, size_t buf_size);
+int open(const char *path, int flag, ...);
+int close(unsigned int fd);
+int print(const char *f);
+
+#endif /* ifndef NORM_STDIO_H */
+
+// vim: ft=c ts=4 sts=4 sw=4 et ai cin

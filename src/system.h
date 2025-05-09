@@ -18,6 +18,8 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
+#pragma once
+
 #ifndef NORM_SYS_H
 #define NORM_SYS_H
 
@@ -38,6 +40,8 @@ typedef __SIZE_TYPE__ ssize_t;
 
 #endif /* ifndef __size_t */
 
+#ifndef NORM_SYS_WAIT_FLAGS
+#define NORM_SYS_WAIT_FLAGS
 // Wait process option flags
 #define WCONTINUED 0x0000    // select processes after SIGCONT signal
 #define WNOHANG    0x0001    // do not block
@@ -46,11 +50,13 @@ typedef __SIZE_TYPE__ ssize_t;
 #define WTRAPPED   0x0004 // select processes being traced (implicit for wait4)
 #define WEXITED    0x0008 // select terminated processes (implicit for wait4)
 #define WNOWAIT    0x0010 // keep selected processes in a waitable state
+#endif                    /* ifndef NORM_SYS_WAIT_FLAGS */
 
 typedef int pid_t;
 struct rusage;
 
-// File handling flags
+#ifndef NORM_SYS_ACCESS_FLAGS
+#define NORM_SYS_ACCESS_FLAGS
 #define O_RDONLY   0x0000    // open for reading only
 #define O_WRONLY   0x0001    // open for writing only
 #define O_RDWR     0x0002    // open for reading and writing
@@ -63,6 +69,8 @@ struct rusage;
 #define O_EXEC     0x0004000 // open for execute only
 #define O_SEARCH   O_EXEC    // open for search only (alias of O_EXEC)
 // ...
+#endif /* ifndef NORM_SYS_ACCESS_FLAGS */
+// File handling flags
 
 // File status constants
 #define F_OK 0
@@ -74,28 +82,9 @@ struct rusage;
 #define BUF_SIZE 4096
 #endif /* ifndef BUF_SIZE */
 
-typedef enum IO_DIR { IO_DIR_IN = 0, IO_DIR_OUT = 1 } IO_DIR;
-
-typedef struct FILE FILE;
-struct FILE {
-    int           fd;
-    int           pos;
-    IO_DIR        dir;
-    int           error;
-    int           eof;
-    unsigned char buf[BUF_SIZE];
-};
-
-#define STDIN_FILENO  0
-#define STDOUT_FILENO 1
-#define STDERR_FILENO 2
-
-extern FILE *stdin;
-extern FILE *stdout;
-extern FILE *stderr;
-
 extern char **envp;
-extern int    main(int argc, char **argv);
+extern int    main(int argc, char *argv[]);
+int           _main(int argc, char *argv[]);
 
 // TODO: Add other architectures and call numbers
 #define SYS_SYSCALL 0
@@ -112,19 +101,37 @@ extern int    main(int argc, char **argv);
 #define SYS_SBRK    11
 // ...
 
+#ifndef NORM_SYS_VARGS
+#define NORM_SYS_VARGS
+
+typedef struct va_list va_list;
+struct va_list {
+    unsigned char *cur;
+};
+
+// void va_copy(va_list dest, va_list src);
+// void va_copy(va_list dest, va_list src)
+// {
+//     asm volatile("ldr x2, [x0]\n"
+//                  "str x2, [x1]\n");
+// }
+#define va_start(a, last) ((a).cur = ( unsigned char * )(&(last)))
+#define va_arg(a, type)   (*(( type * )((a).cur = (a).cur + sizeof(type))))
+#define va_end(a)         ((a).cur = NULL)
+
+#endif /* ifndef NORM_SYS_VARGS */
+
 // defined in the assembler
-extern int   syscall(int num, ...);
-extern void  sys_exit(int status);
-extern int   sys_fork(void);
-extern int   sys_read(unsigned int fd, char *buf, size_t buf_size);
-extern int   sys_write(unsigned int fd, const char *buf, size_t buf_size);
-extern int   sys_open(const char *path, int flag, ...);
-extern int   sys_close(unsigned int fd);
-extern pid_t sys_wait4(pid_t pid, int *status, int options,
-                       struct rusage *rusage);
-extern int   sys_chdir(const char *dir);
-extern int   sys_brk(const void *addr);
-extern void *sys_sbrk(long incr);
+extern int syscall(int num, ...);
+
+// syscall wrappers
+void  exit(int status);
+int   fork(void);
+pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage);
+int   execve(const char *path, const char *argv[], const char *envp[]);
+int   chdir(const char *dir);
+int   brk(const void *addr);
+void *sbrk(long incr);
 
 #endif /* ifndef NORM_SYS_H */
 

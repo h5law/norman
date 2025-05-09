@@ -24,3 +24,10 @@ $(TEST_DIR)/mem:
 
 run_tests: test
 	$(addprefix ./tests/, $(TEST_BINS:=_test.o; ))
+
+syscall_demo: clean
+	$(CC) -nostdinc -ffreestanding -fno-builtin -O0 -c src/syscall-arm64.S -o $(TEST_DIR)/calls.o
+	$(CC) -nostdinc -ffreestanding -fno-builtin -O0 -c src/errno.c -o $(TEST_DIR)/errno.o
+	$(CC) -nostdinc -ffreestanding -fno-builtin -O0 -c src/stdio.c -o $(TEST_DIR)/stdio.o
+	$(CC) -nostdinc -ffreestanding -fno-builtin -O0 -c $(TEST_DIR)/syscalls.c -o $(TEST_DIR)/syscalls.o
+	$(CC) -nostdinc -ffreestanding -fno-builtin -O0 -o calls $(TEST_DIR)/calls.o $(TEST_DIR)/errno.o $(TEST_DIR)/stdio.o $(TEST_DIR)/syscalls.o
