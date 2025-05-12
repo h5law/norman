@@ -1,13 +1,14 @@
-.global syscall
-
 .text
+
+.global _start
+.global syscall
 
 _start:
     ldr x0, [sp]
     add x1, sp, #8
 
     str lr, [sp, #-16]!
-    bl _main
+    bl ___main
     ldr lr, [sp], #16
 
     mov x8, #1

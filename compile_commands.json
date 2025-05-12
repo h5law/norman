@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-nostdinc",
+      "-ffreestanding",
+      "-fno-builtin",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-O0",
+      "-c",
+      "src/system.c",
+      "-o",
+      "tests/system.o"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/system.c",
+    "output": "/Users/harry/Dev/projects/norman/tests/system.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-nostdinc",
+      "-ffreestanding",
+      "-fno-builtin",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-O0",
+      "-c",
+      "src/errno.c",
+      "-o",
+      "tests/errno.o"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/errno.c",
+    "output": "/Users/harry/Dev/projects/norman/tests/errno.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-nostdinc",
+      "-ffreestanding",
+      "-fno-builtin",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-O0",
+      "-c",
+      "src/stdio.c",
+      "-o",
+      "tests/stdio.o"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/stdio.c",
+    "output": "/Users/harry/Dev/projects/norman/tests/stdio.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-nostdinc",
+      "-ffreestanding",
+      "-fno-builtin",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-O0",
+      "-c",
+      "tests/syscalls.c",
+      "-o",
+      "tests/syscalls.o"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/tests/syscalls.c",
+    "output": "/Users/harry/Dev/projects/norman/tests/syscalls.o"
+  }
+]

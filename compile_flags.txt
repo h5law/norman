@@ -1,6 +1,11 @@
 -xc
 -std=c99
 -target=aarch64-unknown-none
+-O0
+-nostdinc
+-nostdlib
+-fno-builtin
+-ffreestanding
 -Wall
 -Werror
 -Wpedantic

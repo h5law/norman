@@ -1,9 +1,17 @@
 ---
 UseTab: Never
 IndentWidth: 4
-ColumnLimit: 80
+ColumnLimit: 78
 ContinuationIndentWidth: 8
-IndentCaseLabels: false
+IndentCaseLabels: true
+
+HeaderFileExtensions: ['h']
+ImplementationFileExtensions: ['c']
+
+WarningsAsErrors: ''
+Fix: true
+FixErrors: true
+FixNotes: true
 
 AlignAfterOpenBracket: Align
 BraceWrapping:

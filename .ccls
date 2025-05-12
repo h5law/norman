@@ -2,3 +2,4 @@ clang
 %c -std=c99
 %h -x
 %h c-header
+--no-standard-includes

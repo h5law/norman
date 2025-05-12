@@ -24,8 +24,6 @@ freely, subject to the following restrictions:
 #include "../src/stdio.h"
 #include "../src/system.h"
 
-int _main(int argc, char *argv[]) { return main(argc, argv); }
-
 int main(int argc, char *argv[])
 {
     if (argc < 2) {

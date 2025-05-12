@@ -18,44 +18,22 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "system.h"
-#include "varg.h"
-#include "stdio.h"
+#ifndef NORM_VARG_H
+#define NORM_VARG_H
 
-int open(const char *path, int flag, ...)
+typedef struct va_list {
+    unsigned char *cur;
+} va_list;
+
+void _va_copy(va_list dest, va_list src)
 {
-    int mode = O_RDONLY;
-
-    if (flag & O_CREAT) {
-        va_list ap;
-        mode |= va_arg(ap, int);
-        va_end(ap);
-    }
-
-    return syscall(SYS_OPEN, path, flag, mode);
+    __asm__ volatile("mov %0, %1\n" : "=r"(dest) : "r"(src) :);
 }
+#define va_copy(dest, src) _va_copy(dest, src)
+#define va_start(a, last)  ((a).cur = ( unsigned char * )(&(last)))
+#define va_arg(a, type)    (*(( type * )((a).cur = (a).cur + sizeof(type))))
+#define va_end(a)          ((a).cur = NULL)
 
-int close(unsigned int fd) { return syscall(SYS_CLOSE, fd); }
-
-int read(unsigned int fd, char *buf, size_t count)
-{
-    return syscall(SYS_READ, fd, buf, count);
-}
-
-int write(unsigned int fd, const char *buf, size_t count)
-{
-    return syscall(SYS_WRITE, fd, buf, count);
-}
-
-int print(char const *f)
-{
-    size_t len = 0;
-
-    while (f[len] != '\0') {
-        ++len;
-    }
-
-    return write(STDOUT_FILENO, f, len);
-}
+#endif /* ifndef NORM_VARG_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 et ai cin
