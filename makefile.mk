@@ -1,12 +1,8 @@
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
-unexport CFLAGS LDFLAGS
+unexport CFLAGS LDFLAGS LIBRARY_PATH C_INCLUDE_PATH
 
-AS=as
-LD=ld
 CC=clang
-
-CARGS=-xc -std=c99
-CFLAGS=-nostdinc -nobuiltininc -fno-builtin -ffreestanding
+CFLAGS=-nostdinc -nostdlib -nobuiltininc -fno-builtin -ffreestanding -fno-stack-protector
 
 SRC_DIR=src
 TEST_DIR=tests
@@ -38,16 +34,16 @@ clean: always
 	rm -rfv $(ALL_OBJS) $(TARGET)
 
 $(BUILD_DIR)/$(CRT).o: $(SRC_DIR)/$(CRT).S
-	$(AS) -o $(BUILD_DIR)/$(CRT).o -c $(SRC_DIR)/$(CRT).S
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(CRT).o -c $(SRC_DIR)/$(CRT).S
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CARGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEST_OBJ): $(TEST_DIR)/$(TEST_FILE)
-	$(CC) $(CARGS) $(CFLAGS) -c $(TEST_DIR)/$(TEST_FILE) -o $(TEST_OBJ)
+	$(CC) $(CFLAGS) -c $(TEST_DIR)/$(TEST_FILE) -o $(TEST_OBJ)
 
 build: clean $(ALL_OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(ALL_OBJS)
+	$(CC) -o $(TARGET) $(ALL_OBJS)
 
 demo: $(TARGET)
 	./$(TARGET) $(SRC_DIR)/system.h

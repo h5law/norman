@@ -2,16 +2,37 @@ cmake_minimum_required(VERSION 3.16)
 set(NAME norman)
 project(${NAME} LANGUAGES C ASM)
 
-find_program(CLANG_CLANG clang)
-
-if(CLANG_CLANG)
-        message(STATUS "Found clang at: ${CLANG_CLANG}")
-else()
-        message(FATAL_ERROR "Clang not found.  Please ensure it's installed and in
-your PATH.")
-endif()
+set(CLANG_CLANG clang)
 set(CMAKE_C_COMPILER ${CLANG_CLANG})
-set(CMAKE_C_FLAGS "-O0")
+set(CMAKE_ASM_COMPILER ${CLANG_CLANG})
+# if(CLANG_CLANG)
+#         message(STATUS "Found clang at: ${CLANG_CLANG}")
+# else()
+#         message(FATAL_ERROR "Clang not found.  Please ensure it's installed and in
+# your PATH.")
+# endif()
+
+# Unset environment variables
+unset(ENV{CFLAGS})
+unset(ENV{LDFLAGS})
+unset(ENV{LIBRARY_PATH})
+unset(ENV{C_INCLUDE_PATH})
+
+# Clear any cached compiler flags
+set(CMAKE_C_FLAGS "" CACHE STRING "C compiler flags" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS "" CACHE STRING "Linker flags" FORCE)
+set(CMAKE_SHARED_LINKER_FLAGS "" CACHE STRING "Shared linker flags" FORCE)
+set(CMAKE_MODULE_LINKER_FLAGS "" CACHE STRING "Module linker flags" FORCE)
+
+# Prevent CMake from automatically adding include or library paths
+set(CMAKE_SYSTEM_INCLUDE_PATH "")
+set(CMAKE_SYSTEM_LIBRARY_PATH "")
+
+# Ensure no external libraries or includes are added implicitly
+set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
+
+# Optionally, set the compiler to operate in a minimal mode
+add_compile_options(-nostdinc -nobuiltininc -nostdlib -fno-builtin -ffreestanding -fno-stack-protector)
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -32,7 +53,7 @@ endif()
 set(BUILD_DIR ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}-${ARCH})
 file(MAKE_DIRECTORY ${BUILD_DIR})
 
-set(SOURCES
+add_executable(demo
         src/syscall-arm64.S
         src/system.c
         src/errno.c
@@ -41,28 +62,3 @@ set(SOURCES
         src/string.c
         tests/syscalls.c
 )
-
-# set(OBJECT_FILES
-#         ${BUILD_DIR}/syscall-arm64.o
-#         ${BUILD_DIR}/system.o
-#         ${BUILD_DIR}/errno.o
-#         ${BUILD_DIR}/stdio.o
-#         ${BUILD_DIR}/mem.o
-#         ${BUILD_DIR}/string.o
-#         ${BUILD_DIR}/syscalls.o
-# )
-
-set(TARGET demo)
-
-add_executable(${TARGET}
-    ${SOURCES}
-)
-set_target_properties(${TARGET} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR}
-)
-
-set_target_properties(${TARGET} PROPERTIES C_STANDARD 99)
-set_target_properties(${TARGET} PROPERTIES C_STANDARD_REQUIRED ON)
-set_target_properties(${TARGET} PROPERTIES CMAKE_WERROR_ON_UNUSABLE_WARNINGS TRUE)
-
-target_compile_options(${TARGET} PRIVATE -nostdinc -nobuiltininc -fno-builtin -ffreestanding)

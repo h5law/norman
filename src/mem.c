@@ -93,6 +93,8 @@ void *calloc(size_t count, size_t size)
 void free(void *ptr)
 {
     free_block *block = ( free_block * )((( char * )ptr) - sizeof(size_t));
+    block->next       = free_block_list_head.next;
+    free_block_list_head.next = block;
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 et ai cin
