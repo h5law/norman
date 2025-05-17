@@ -1,7 +1,7 @@
-.text
-
 .global _start
 .global syscall
+
+.text
 
 _start:
     ldr x0, [sp]

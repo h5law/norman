@@ -31,6 +31,14 @@ freely, subject to the following restrictions:
 #define EOF (-1)
 #endif /* ifndef EOF */
 
+#ifndef FALSE
+#define FALSE 0
+#endif /* ifndef FALSE */
+
+#ifndef TRUE
+#define TRUE 1
+#endif /* ifndef TRUE */
+
 #ifndef __size_t
 typedef __SIZE_TYPE__ size_t;
 // use (unsigned -> signed) remapping for signed variant definition
@@ -38,6 +46,28 @@ typedef __SIZE_TYPE__ size_t;
 typedef __SIZE_TYPE__ ssize_t;
 #undef unsigned // unmap (unsigned -> signed) reverting to normal
 #endif          /* ifndef __size_t */
+
+#ifdef __LP64__
+#define __WORDSIZE 64
+#else
+#define __WORDSIZE                32
+#define __WORDSIZE32_SIZE_ULONG   0
+#define __WORDSIZE32_PTRDIFF_LONG 0
+#endif
+
+#if __WORDSIZE == 64
+#ifndef __intptr_t_defined
+#define __intptr_t_defined
+typedef long int intptr_t;
+#endif /* ifndef __intptr_t_defined */
+typedef unsigned long int uintptr_t;
+#else
+#ifndef __intptr_t_defined
+#define __intptr_t_defined
+typedef int intptr_t;
+#endif /* ifndef __intptr_t_defined */
+typedef unsigned int uintptr_t;
+#endif /* if __WORDSIZE == 64 */
 
 typedef int pid_t;
 struct rusage;
@@ -78,8 +108,6 @@ int   fork(void);
 pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage);
 int   execve(const char *path, const char *argv[], const char *envp[]);
 int   chdir(const char *dir);
-int   brk(const void *addr);
-void *sbrk(long incr);
 
 #endif /* ifndef NORM_SYS_H */
 

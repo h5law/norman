@@ -52,8 +52,7 @@ TODO:
 #ifndef NORM_MEM_H
 #define NORM_MEM_H
 
-#include <stdint.h>
-#include <sys/types.h>
+#include "system.h"
 
 #define NORM_MEM_BACKEND_LIBC_MALLOC 0
 #define NORM_MEM_BACKEND_MMAP 1

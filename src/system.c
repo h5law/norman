@@ -19,7 +19,6 @@ freely, subject to the following restrictions:
  */
 
 #include "system.h"
-#include <src/stdio.h>
 
 extern int main(int argc, char *argv[]);
 
@@ -35,7 +34,5 @@ int __main(int argc, char *argv[])
 
     return main(argc, argv);
 }
-
-
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

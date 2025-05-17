@@ -3,15 +3,7 @@ UseTab: Never
 IndentWidth: 4
 ColumnLimit: 78
 ContinuationIndentWidth: 8
-IndentCaseLabels: true
-
-HeaderFileExtensions: ['h']
-ImplementationFileExtensions: ['c']
-
-WarningsAsErrors: ''
-Fix: true
-FixErrors: true
-FixNotes: true
+IndentCaseLabels: false
 
 AlignAfterOpenBracket: Align
 BraceWrapping:

@@ -18,38 +18,30 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "./errno.h"
+#include "string.h"
 
-int set_errno(int num)
+void *memset(void *b, int c, size_t len)
 {
-    errno = num;
-    return -1;
+    register int i;
+    for (i = 0; i < len; ++i)
+        (( char * )b)[i] = c;
+    return b;
 }
 
-// void perror(const char *str)
-// {
-//     int _errno = errno;
-//     if (str && str[0]) {
-//         fputs(str, stderr);
-//         fputs(": ", stderr);
-//     }
-//     fputs(strerror(_errno), stderr);
-//     fputs("\n", stderr);
-//     fflush(stderr);
-// }
-//
-// static char _errbuf[128];
-//
-// char *strerror(int errnum)
-// {
-//     if (errnum < sys_nerr) {
-//         strcpy(_errbuf, sys_errlist[errnum]);
-//     } else {
-//         strcpy(_errbuf, "Error ");
-//         itoa(errnum, _errbuf + strlen(_errbuf), 10);
-//     }
-//
-//     return _errbuf;
-// }
+int memcmp(const void *a, const void *b, size_t size)
+{
+    register int i = 0;
+    for (i = 0; i < size; ++i) {
+        if ((( unsigned char * )a)[i] != (( unsigned char * )b)[i])
+            return -1;
+    }
+    return 0;
+}
 
-// vim: ft=c ts=4 sts=4 sw=4 cin et nospell
+int memvacmp(void *memory, unsigned char val, size_t size)
+{
+    unsigned char *mm = ( unsigned char * )memory;
+    return (*mm == val) && memcmp(mm, mm + 1, size - 1) == 0;
+}
+
+// vim: ft=c ts=4 sts=4 sw=4 et ai cin

@@ -23,12 +23,6 @@ freely, subject to the following restrictions:
 
 #include "utils.h"
 
-int memvcmp(void *memory, unsigned char val, size_t size)
-{
-    unsigned char *mm = ( unsigned char * )memory;
-    return (*mm == val) && memcmp(mm, mm + 1, size - 1) == 0;
-}
-
 void assertf(int eval, char *desc)
 {
     char *symbol = "❌";

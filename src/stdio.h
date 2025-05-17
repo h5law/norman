@@ -51,17 +51,14 @@ freely, subject to the following restrictions:
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
-typedef enum __io_dir {
-    _IODIR_IN = 0,
-    _IODIR_OUT = 1
-} _io_dir;
+typedef enum __io_dir { _IODIR_IN = 0, _IODIR_OUT = 1 } _io_dir;
 
 typedef struct __sFILE {
-    int fd;
-    int pos;
-    _io_dir io_dir;
-    int error;
-    int eof;
+    int           fd;
+    int           pos;
+    _io_dir       io_dir;
+    int           error;
+    int           eof;
     unsigned char buf[BUFSIZ];
 } FILE;
 
@@ -73,7 +70,12 @@ int read(unsigned int fd, char *buf, size_t buf_size);
 int write(unsigned int fd, const char *buf, size_t buf_size);
 int open(const char *path, int flag, ...);
 int close(unsigned int fd);
-int print(const char *f);
+
+FILE *fdopen(unsigned int fd, const char *mode);
+int   fflush(FILE *f);
+int   fclose(FILE *f);
+
+int print(const char *str);
 
 #endif /* ifndef NORM_STDIO_H */
 

@@ -18,9 +18,11 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
+#include "stdio.h"
+#include "mem.h"
+#include "string.h"
 #include "system.h"
 #include "varg.h"
-#include "stdio.h"
 
 int open(const char *path, int flag, ...)
 {
@@ -28,6 +30,7 @@ int open(const char *path, int flag, ...)
 
     if (flag & O_CREAT) {
         va_list ap;
+        va_start(ap, flag);
         mode |= va_arg(ap, int);
         va_end(ap);
     }
@@ -47,15 +50,54 @@ int write(unsigned int fd, const char *buf, size_t count)
     return syscall(SYS_WRITE, fd, buf, count);
 }
 
-int print(char const *f)
+FILE *fdopen(unsigned int fd, const char *mode)
+{
+    FILE *ret = NULL;
+    ret       = ( FILE * )malloc(sizeof(FILE));
+    if (mode[0] == 'a' || mode[0] == 'w')
+        ret->io_dir = _IODIR_OUT;
+    else
+        ret->io_dir = _IODIR_IN;
+    memset(ret->buf, 0, BUFSIZ);
+    ret->pos   = 0;
+    ret->fd    = fd;
+    ret->eof   = FALSE;
+    ret->error = FALSE;
+    return ret;
+}
+
+int fflush(FILE *f)
+{
+    int ret = 0;
+    switch (f->io_dir) {
+    case _IODIR_IN:
+        f->pos = 0;
+        break;
+    case _IODIR_OUT:
+        if (write(f->fd, ( const char * )f->buf, f->pos) != 0)
+            ret = -1;
+        break;
+    }
+    f->pos = 0;
+    return ret;
+}
+
+int fclose(FILE *f)
+{
+    fflush(f);
+    free(f);
+    return 0;
+}
+
+int print(char const *str)
 {
     size_t len = 0;
 
-    while (f[len] != '\0') {
+    while (str[len] != '\0') {
         ++len;
     }
 
-    return write(STDOUT_FILENO, f, len);
+    return write(STDOUT_FILENO, str, len);
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 et ai cin
