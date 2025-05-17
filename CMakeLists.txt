@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 set(NAME norman)
 project(${NAME} LANGUAGES C ASM)
+
+find_program(CLANG_CLANG clang)
+
+if(CLANG_CLANG)
+        message(STATUS "Found clang at: ${CLANG_CLANG}")
+else()
+        message(FATAL_ERROR "Clang not found.  Please ensure it's installed and in
+your PATH.")
+endif()
+set(CMAKE_C_COMPILER ${CLANG_CLANG})
 set(CMAKE_C_FLAGS "-O0")
 
 # Build type

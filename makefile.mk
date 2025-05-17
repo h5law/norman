@@ -50,5 +50,4 @@ build: clean $(ALL_OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(ALL_OBJS)
 
 demo: $(TARGET)
-	# ./$(TARGET) $(SRC_DIR)/system.h
-	./$(TARGET) Makefile
+	./$(TARGET) $(SRC_DIR)/system.h

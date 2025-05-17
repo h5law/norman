@@ -37,15 +37,3 @@ __set_errno_internal:
     mov x0, x0
     bl _set_errno
     ret
-    ; sub sp, sp, #16
-    ;
-    ; str w0, [sp, #12]
-    ; ldr w8, [sp, #12]
-    ;
-    ; adrp x9, _errno@GOTPAGE
-    ; ldr x9, [x9, _errno@GOTPAGEOFF]
-    ;
-    ; str w8, [x9]
-    ; add sp, sp, #16
-    ;
-    ; ret
