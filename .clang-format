@@ -1,8 +1,10 @@
 ---
-Language: Cpp
-Standard: c++03
-
+UseTab: Never
 IndentWidth: 4
+ColumnLimit: 78
+ContinuationIndentWidth: 8
+IndentCaseLabels: false
+
 AlignAfterOpenBracket: Align
 BraceWrapping:
   AfterFunction: true
@@ -12,17 +14,19 @@ BraceWrapping:
   AfterUnion: false
 AlwaysBreakAfterReturnType: None
 BreakBeforeBraces: Linux
-ColumnLimit: 80
-ContinuationIndentWidth: 8
-IndentCaseLabels: false
-KeepEmptyLinesAtTheStartOfBlocks: false
-MaxEmptyLinesToKeep: 1
+
 PointerAlignment: Right
 SpaceAfterCStyleCast: false
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
-SpacesInCStyleCastParentheses: false
+SpacesInCStyleCastParentheses: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-TabWidth: 4
-UseTab: Never
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignTrailingComments: true
+
+MaxEmptyLinesToKeep: 1

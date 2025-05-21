@@ -1,0 +1,110 @@
+[
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-xc",
+      "-std=c99",
+      "-O0",
+      "-nostdinc",
+      "-fno-builtin",
+      "-ffreestanding",
+      "-c",
+      "-o",
+      "build/system.o",
+      "src/system.c"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/system.c",
+    "output": "/Users/harry/Dev/projects/norman/build/system.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-xc",
+      "-std=c99",
+      "-O0",
+      "-nostdinc",
+      "-fno-builtin",
+      "-ffreestanding",
+      "-c",
+      "-o",
+      "build/errno.o",
+      "src/errno.c"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/errno.c",
+    "output": "/Users/harry/Dev/projects/norman/build/errno.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-xc",
+      "-std=c99",
+      "-O0",
+      "-nostdinc",
+      "-fno-builtin",
+      "-ffreestanding",
+      "-c",
+      "-o",
+      "build/stdio.o",
+      "src/stdio.c"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/stdio.c",
+    "output": "/Users/harry/Dev/projects/norman/build/stdio.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-xc",
+      "-std=c99",
+      "-O0",
+      "-nostdinc",
+      "-fno-builtin",
+      "-ffreestanding",
+      "-c",
+      "-o",
+      "build/mem.o",
+      "src/mem.c"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/mem.c",
+    "output": "/Users/harry/Dev/projects/norman/build/mem.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-xc",
+      "-std=c99",
+      "-O0",
+      "-nostdinc",
+      "-fno-builtin",
+      "-ffreestanding",
+      "-c",
+      "-o",
+      "build/string.o",
+      "src/string.c"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/src/string.c",
+    "output": "/Users/harry/Dev/projects/norman/build/string.o"
+  },
+  {
+    "arguments": [
+      "/opt/local/bin/clang",
+      "-xc",
+      "-std=c99",
+      "-O0",
+      "-nostdinc",
+      "-fno-builtin",
+      "-ffreestanding",
+      "-c",
+      "-o",
+      "build/syscalls.o",
+      "tests/syscalls.c"
+    ],
+    "directory": "/Users/harry/Dev/projects/norman",
+    "file": "/Users/harry/Dev/projects/norman/tests/syscalls.c",
+    "output": "/Users/harry/Dev/projects/norman/build/syscalls.o"
+  }
+]

@@ -1,3 +1,4 @@
+/*
 Copyright (c) 2025 h5law <dev@h5law.com>
 
 This software is provided 'as-is', without any express or implied
@@ -15,3 +16,19 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
+ */
+
+#include <stdio.h>
+#include <string.h>
+
+#include "utils.h"
+
+void assertf(int eval, char *desc)
+{
+    char *symbol = "❌";
+    if (eval == 1)
+        symbol = "✅";
+    printf("%s [%d]\t%s %s\n", __FILE__, __LINE__, symbol, desc);
+}
+
+// vim: ft=c ts=4 sts=4 sw=4 cin et nospell

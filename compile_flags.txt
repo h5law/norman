@@ -1,5 +1,7 @@
 -xc
 -std=c99
--Wall
--Werror
--Wpedantic
+-target=aarch64-unknown-none
+-nostdinc
+-nobuiltininc
+-fno-builtin
+-ffreestanding

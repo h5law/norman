@@ -1,2 +1,3 @@
-tests/*.o
-norm_misc_artifacts.h
+.DS_Store
+build/
+.cache/
