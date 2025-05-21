@@ -9,23 +9,23 @@ pub fn build(b: *std.Build) void {
 
     // Validate supported architectures
     switch (target.result.cpu.arch) {
-        .aarch64, .arm => {},
+        .aarch64 => {},
         else => {
             std.debug.print("Unsupported arch: {?}. Only arm64/aarch64 is currently supported.\n", .{target.result.cpu.arch});
             std.process.exit(1);
         },
     }
 
-    // Create an executable
-    const exe = b.addExecutable(.{
+    // Create the demo executable
+    const demo = b.addExecutable(.{
         .name = "demo",
         .target = target,
         .optimize = optimize,
         .link_libc = false,
     });
 
-    // Set build flags corresponding to the CMake options
-    exe.addCSourceFiles(.{
+    // Set source files and build flags
+    demo.addCSourceFiles(.{
         .files = &[_][]const u8{
             "src/syscall-arm64.S",
             "src/system.c",
@@ -43,10 +43,10 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    b.installArtifact(exe);
+    b.installArtifact(demo);
 
-    // Add a run step
-    const run_cmd = b.addRunArtifact(exe);
+    // Add a run step for the demo
+    const run_cmd = b.addRunArtifact(demo);
     run_cmd.addArg("src/system.h");
     const run_step = b.step("run", "Run the application");
     run_step.dependOn(&run_cmd.step);
