@@ -2,7 +2,7 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 unexport CFLAGS LDFLAGS LIBRARY_PATH C_INCLUDE_PATH
 
 CC=clang
-CFLAGS=-nostdinc -nostdlib -nobuiltininc -fno-builtin -ffreestanding -fno-stack-protector
+CFLAGS=-nostdinc -fno-builtin -fno-stack-protector
 
 SRC_DIR=src
 TEST_DIR=tests
@@ -43,7 +43,7 @@ $(TEST_OBJ): $(TEST_DIR)/$(TEST_FILE)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/$(TEST_FILE) -o $(TEST_OBJ)
 
 build: clean $(ALL_OBJS)
-	$(CC) -o $(TARGET) $(ALL_OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(ALL_OBJS)
 
 demo: $(TARGET)
 	./$(TARGET) $(SRC_DIR)/system.h

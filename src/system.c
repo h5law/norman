@@ -19,18 +19,20 @@ freely, subject to the following restrictions:
  */
 
 #include "system.h"
-
-extern int main(int argc, char *argv[]);
+#include "stdio.h"
 
 char **envp;
 
-int __main(int argc, char *argv[])
+FILE *stdin, *stdout, *stderr;
+
+int __main(int argc, char **argv)
 {
     envp = &(argv[argc + 1]);
 
-    // stdin = fdopen(STDIN_FILENO, "r");
-    // stdout = fdopen(STDOUT_FILENO, "w");
-    // stderr = fdopen(STDERR_FILENO, "w");
+    // Initialize stdin, stdout, stderr
+    stdin  = fdopen(STDIN_FILENO, "r");
+    stdout = fdopen(STDOUT_FILENO, "w");
+    stderr = fdopen(STDERR_FILENO, "w");
 
     return main(argc, argv);
 }

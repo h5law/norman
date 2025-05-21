@@ -1,8 +1,20 @@
-.global _start
-.global syscall
+    .text
+    .align 4
 
-.text
+//  ; _start:
+//  ;     ldr x0, [sp]
+//  ;     add x1, sp, #8
+//  ;
+//  ;     str lr, [sp, #-16]!
+//  ;     bl __main
+//  ;     ldr lr, [sp], #16
+//  ;
+//  ;     mov x8, #1
+//  ;     svc #0
 
+//  ; .section .start
+    .global _start
+//  ; .type _start,%function
 _start:
     ldr x0, [sp]
     add x1, sp, #8
@@ -14,6 +26,9 @@ _start:
     mov x8, #1
     svc #0
 
+//  ; .section .syscall
+    .global syscall
+//  ; .type syscall,%function
 syscall:
     /* Move syscall number into x0 from x8 */
     mov     x8, x0

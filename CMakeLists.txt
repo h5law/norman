@@ -32,7 +32,7 @@ set(CMAKE_SYSTEM_LIBRARY_PATH "")
 set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
 
 # Optionally, set the compiler to operate in a minimal mode
-add_compile_options(-nostdinc -nobuiltininc -nostdlib -fno-builtin -ffreestanding -fno-stack-protector)
+add_compile_options(-nostdinc -fno-builtin -ffreestanding -fno-stack-protector)
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)

@@ -79,8 +79,10 @@ struct rusage;
 #define WEXITED    0x0008 // select terminated processes (implicit for wait4)
 #define WNOWAIT    0x0010 // keep selected processes in a waitable state
 
+extern int    envc;
 extern char **envp;
-int           __main(int argc, char *argv[]);
+
+extern int main(int argc, char **argv);
 
 // TODO: Add other architectures and call numbers
 #define SYS_SYSCALL 0
