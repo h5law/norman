@@ -31,7 +31,7 @@ always:
 	mkdir -pv $(BUILD_DIR)
 
 clean: always
-	rm -rfv $(ALL_OBJS) $(TARGET)
+	rm -rfv $(ALL_OBJS) $(TARGET) .zig-cache zig-out build
 
 $(BUILD_DIR)/$(CRT).o: $(SRC_DIR)/$(CRT).S
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(CRT).o -c $(SRC_DIR)/$(CRT).S

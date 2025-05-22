@@ -26,12 +26,13 @@ freely, subject to the following restrictions:
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
+    if (argc < 2 || argc > 2) {
         print("Usage: %s <filename>\n");
         return 1;
     }
 
     // Open the file using our syscall function
+    print("Opening file...\n");
     int fd = open(argv[1], O_RDONLY, 0);
     if (fd < 0) {
         print("Error opening file\n");
