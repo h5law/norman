@@ -40,6 +40,8 @@ pub fn build(b: *std.Build) void {
         },
     });
 
+    b.installArtifact(nlibc);
+
     // Create the demo executable
     const demo = b.addExecutable(.{
         .name = "demo",

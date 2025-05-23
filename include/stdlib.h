@@ -18,8 +18,8 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef NORM_SYS_H
-#define NORM_SYS_H
+#ifndef NORM_STDLIB_H
+#define NORM_STDLIB_H
 
 #ifndef NULL
 #define NULL (( void * )0)
@@ -37,35 +37,13 @@ freely, subject to the following restrictions:
 #define TRUE 1
 #endif /* ifndef TRUE */
 
-#ifndef __size_t
-typedef __SIZE_TYPE__ size_t;
-// use (unsigned -> signed) remapping for signed variant definition
-#define unsigned signed
-typedef __SIZE_TYPE__ ssize_t;
-#undef unsigned // unmap (unsigned -> signed) reverting to normal
-#endif          /* ifndef __size_t */
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif /* ifndef EXIT_SUCCESS */
 
-#ifdef __LP64__
-#define __WORDSIZE 64
-#else
-#define __WORDSIZE                32
-#define __WORDSIZE32_SIZE_ULONG   0
-#define __WORDSIZE32_PTRDIFF_LONG 0
-#endif
-
-#if __WORDSIZE == 64
-#ifndef __intptr_t_defined
-#define __intptr_t_defined
-typedef long int intptr_t;
-#endif /* ifndef __intptr_t_defined */
-typedef unsigned long int uintptr_t;
-#else
-#ifndef __intptr_t_defined
-#define __intptr_t_defined
-typedef int intptr_t;
-#endif /* ifndef __intptr_t_defined */
-typedef unsigned int uintptr_t;
-#endif /* if __WORDSIZE == 64 */
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif /* ifndef EXIT_FAILURE */
 
 typedef int pid_t;
 struct rusage;
@@ -82,33 +60,16 @@ struct rusage;
 extern int    envc;
 extern char **envp;
 
-extern int main(int argc, char **argv);
-
-// TODO: Add other architectures and call numbers
-#define SYS_SYSCALL 0
-#define SYS_EXIT    1
-#define SYS_FORK    2
-#define SYS_READ    3
-#define SYS_WRITE   4
-#define SYS_OPEN    5
-#define SYS_CLOSE   6
-#define SYS_WAIT4   7
-#define SYS_CHDIR   8
-#define SYS_EXECVE  9
-#define SYS_BRK     10
-#define SYS_SBRK    11
-// ...
-
-// defined in the assembler
-extern int syscall(int num, ...);
-
 // syscall wrappers
-void  exit(int status);
+void exit(int status);
+void _Exit(int status);
+int  atexit(void (*func)(void));
+
 int   fork(void);
 pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage);
 int   execve(const char *path, const char *argv[], const char *envp[]);
 int   chdir(const char *dir);
 
-#endif /* ifndef NORM_SYS_H */
+#endif /* ifndef NORM_STDLIB_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

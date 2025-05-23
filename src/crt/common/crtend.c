@@ -18,22 +18,9 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef NORM_VARG_H
-#define NORM_VARG_H
+#ifndef NORM_CRT_END_H
+#define NORM_CRT_END_H
 
-typedef struct va_list {
-    unsigned char *cur;
-} va_list;
+#endif /* ifndef NORM_CRT_END_H */
 
-void _va_copy(va_list dest, va_list src)
-{
-    __asm__ volatile("mov %0, %1\n" : "=r"(dest) : "r"(src) :);
-}
-#define va_copy(dest, src) _va_copy(dest, src)
-#define va_start(a, last)  ((a).cur = ( unsigned char * )(&(last)))
-#define va_arg(a, type)    (*(( type * )((a).cur = (a).cur + sizeof(type))))
-#define va_end(a)          ((a).cur = NULL)
-
-#endif /* ifndef NORM_VARG_H */
-
-// vim: ft=c ts=4 sts=4 sw=4 et ai cin
+// vim: ft=c ts=4 sts=4 sw=4 cin et nospell

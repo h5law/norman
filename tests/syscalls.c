@@ -18,11 +18,11 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 /* simple syscall (syscall-arm64.S + system.h) test program
- * СИГМА - БАСЕДЕВ
+ * СИГМА - БАСЕД ДЕВ
  */
 
-#include "../src/stdio.h"
-#include "../src/system.h"
+#include <stdio.h>
+#include <sys/types.h>
 
 int main(int argc, char *argv[])
 {

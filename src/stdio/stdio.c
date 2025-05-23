@@ -18,11 +18,11 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "stdio.h"
-#include "mem.h"
-#include "string.h"
-#include "system.h"
-#include "varg.h"
+#include <mem.h>
+#include <stdio.h>
+#include <string.h>
+#include <system.h>
+#include <varg.h>
 
 int open(const char *path, int flag, ...)
 {

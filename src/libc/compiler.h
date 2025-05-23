@@ -18,23 +18,15 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "system.h"
-#include "stdio.h"
+#ifndef NORM_COMPILER_H
+#define NORM_COMPILER_H
 
-char **envp;
+#ifdef __aarch64__
+#define ELFABI
+#else
+#error "Unsupported architecture"
+#endif /* #ifdef __arm64__ */
 
-FILE *stdin, *stdout, *stderr;
-
-int __main(int argc, char **argv)
-{
-    envp = &(argv[argc + 1]);
-
-    // Initialize stdin, stdout, stderr
-    stdin  = fdopen(STDIN_FILENO, "r");
-    stdout = fdopen(STDOUT_FILENO, "w");
-    stderr = fdopen(STDERR_FILENO, "w");
-
-    return main(argc, argv);
-}
+#endif /* NORM_COMPILER_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

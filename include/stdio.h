@@ -21,7 +21,7 @@ freely, subject to the following restrictions:
 #ifndef NORM_STDIO_H
 #define NORM_STDIO_H
 
-#include "system.h"
+#include <sys/types.h>
 
 // File handling flags
 #define O_RDONLY   0x0000    // open for reading only

@@ -18,22 +18,21 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "../stdio.h"
-#include "../system.h"
+#include <stdio.h>
 
-int    envc = 0;
-char **envp;
+#include "../common/crt_common.h"
+
+extern int main(int argc, char **argv);
 
 extern void _init(void);
 extern void _fini(void);
 
 FILE *stdin, *stdout, *stderr;
 
-int __main(int argc, char **argv)
+int _start(int argc, char **argv)
 {
-    envp = &(argv[argc + 1]);
+    environ = ( char ** )&(argv[argc + 1]);
 
-    // Initialize stdin, stdout, stderr
     stdin  = fdopen(STDIN_FILENO, "r");
     stdout = fdopen(STDOUT_FILENO, "w");
     stderr = fdopen(STDERR_FILENO, "w");
@@ -42,9 +41,6 @@ int __main(int argc, char **argv)
     // signal(SIGINT, SIG_DFL);
     // signal(SIGSEGV, SIG_DFL);
     // signal(SIGTERM, SIG_DFL);
-
-    // Initialize heap (normally handled by malloc implementation)
-    // This is just a placeholder - most C libraries handle this internally
 
     return main(argc, argv);
 }
