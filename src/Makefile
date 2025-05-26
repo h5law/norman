@@ -1,6 +1,6 @@
 AR=llvm-ar
 CC=clang
-CFLAGS=-nostdinc -fno-builtin -ffreestanding -fno-stack-protector
+CFLAGS=-nostdinc -fno-builtin -ffreestanding -fno-stack-protector -I${NORM_PATH}/include
 LDFLAGS=-nostdlib
 
 ARCH=$(shell uname -m | sed 's/arm64/aarch64/')
