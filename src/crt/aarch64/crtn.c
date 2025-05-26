@@ -20,9 +20,14 @@ freely, subject to the following restrictions:
 
 typedef void (*ctr_fn)(void);
 
-ctr_fn _init_array_end[0] __attribute__((used, section(".init_array"),
-                                         aligned(sizeof(ctr_fn)))) = {};
-ctr_fn _fini_array_end[0] __attribute__((used, section(".fini_array"),
-                                         aligned(sizeof(ctr_fn)))) = {};
+#ifdef __MACH__
+ctr_fn _init_array_end[0]
+        __attribute__((__used__, section("__DATA,.init_array")));
+ctr_fn _fini_array_end[0]
+        __attribute__((__used__, section("__DATA,.fini_array")));
+#else
+ctr_fn _init_array_end[0] __attribute__((__used__, section(".init_array")));
+ctr_fn _fini_array_end[0] __attribute__((__used__, section(".fini_array")));
+#endif
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

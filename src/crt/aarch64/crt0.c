@@ -19,30 +19,29 @@ freely, subject to the following restrictions:
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../common/crt_common.h"
 
 extern int main(int argc, char **argv);
 
-extern void _init(void);
-extern void _fini(void);
-
 FILE *stdin, *stdout, *stderr;
 
-int _start(int argc, char **argv)
+void __start(int argc, char **argv, char **envp)
 {
-    environ = ( char ** )&(argv[argc + 1]);
+    __progname = argv[0];
+    environ    = envp;
 
     stdin  = fdopen(STDIN_FILENO, "r");
     stdout = fdopen(STDOUT_FILENO, "w");
     stderr = fdopen(STDERR_FILENO, "w");
 
-    // Set up default signal handlers
+    // TODO: Set up default signal handlers
     // signal(SIGINT, SIG_DFL);
     // signal(SIGSEGV, SIG_DFL);
     // signal(SIGTERM, SIG_DFL);
 
-    return main(argc, argv);
+    exit(main(argc, argv));
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

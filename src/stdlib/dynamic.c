@@ -18,14 +18,13 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include <checkint.h>
-#include <math.h>
+#include <dynamic.h>
+#include <mem.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "dynamic.h"
-#include "utils.h"
+#include <sys/types.h>
+#include <utils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 //                        Dynamic Array/Vector Methods                        //
@@ -69,20 +68,12 @@ int norm_vector_spos(norm_vector_t *vec, size_t index, void *elem,
     int new_size = vec->size;
     if (memvcmp((( char * )(vec->array)) + (index * elem_size),
                 ( unsigned char )0, elem_size)) {
-        int add_err = CHECKINT_NO_ERROR;
-        new_size    = check_int32_add(vec->size, 1, &add_err);
-        if (add_err != CHECKINT_NO_ERROR) {
-            return NORM_DYN_ERR_OFLOW;
-        }
+        new_size = vec->size + 1;
     }
     if (( double )new_size >= ( double )vec->capacity * vec->load_factor) {
         void  *new_arr;
-        int    mul_err = CHECKINT_NO_ERROR;
-        size_t new_cap;
-        new_cap = check_int64_mul(vec->capacity, 2, &mul_err);
-        if (mul_err != CHECKINT_NO_ERROR)
-            return NORM_DYN_ERR_OFLOW;
-        new_arr = calloc(new_cap, elem_size);
+        size_t new_cap = vec->capacity * 2;
+        new_arr        = calloc(new_cap, elem_size);
         if (new_arr == NULL)
             return NORM_DYN_ERR_ALLOC;
         memmove(new_arr, ( char * )vec->array, vec->capacity * elem_size);
@@ -211,7 +202,8 @@ norm_vector_t norm_vector_concat(norm_vector_t *vec1, norm_vector_t *vec2,
     new.size        = vec1->size + vec2->size;
     new.capacity    = vec1->capacity + vec2->capacity;
     new.end_ptr     = vec1->capacity + vec2->end_ptr - 1;
-    new.load_factor = fmin(vec1->load_factor, vec2->load_factor);
+    new.load_factor = vec1->load_factor > vec2->load_factor ? vec2->load_factor
+                                                            : vec1->load_factor;
     new.array       = array;
 
     return new;

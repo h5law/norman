@@ -26,7 +26,7 @@ freely, subject to the following restrictions:
 #ifndef NORM_UTILS_H
 #define NORM_UTILS_H
 
-#include "system.h"
+#include <sys/types.h>
 
 int  memvcmp(void *memory, unsigned char val, size_t size);
 void assertf(int eval, char *desc);

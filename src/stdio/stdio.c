@@ -20,21 +20,13 @@ freely, subject to the following restrictions:
 
 #include <mem.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <system.h>
+#include <sys/syscall.h>
 #include <varg.h>
 
-int open(const char *path, int flag, ...)
+int open(const char *path, int flag, int mode)
 {
-    int mode = O_RDONLY;
-
-    if (flag & O_CREAT) {
-        va_list ap;
-        va_start(ap, flag);
-        mode |= va_arg(ap, int);
-        va_end(ap);
-    }
-
     return syscall(SYS_OPEN, path, flag, mode);
 }
 
@@ -82,6 +74,59 @@ int fflush(FILE *f)
     return ret;
 }
 
+int _fwrite(const char *ptr, size_t size, FILE *f)
+{
+    int ret = 0;
+    for (int i = 0; (i < size) && (ret == 0); ++i) {
+        // TODO: Improve splits (\n, ...) with appropriate stream types
+        f->buf[f->pos++] = ptr[i];
+        if (f->pos == BUFSIZ) {
+            ret    = fflush(f);
+            f->pos = 0;
+        }
+    }
+    return ret;
+}
+
+size_t fwrite(const void *buf, size_t size, size_t count, FILE *f)
+{
+    int         i   = 0;
+    int         ok  = TRUE;
+    const char *ptr = buf;
+    for (i = 0; i < count && ok; i++) {
+        if (_fwrite(ptr, size, f) != 0)
+            ok = FALSE;
+        ptr += size;
+        // TODO: set error
+    }
+    return i;
+}
+
+int fputs(const char *str, FILE *f)
+{
+    int l = strlen(str);
+    return _fwrite(str, l, f);
+}
+
+size_t fread(void *buf, size_t size, size_t n, FILE *f)
+{
+    int    ret   = 0;
+    size_t total = size * n;
+
+    int r = read(f->fd, buf, total);
+    if (r < 0) {
+        f->error = TRUE;
+        ret      = 0;
+    } else if (r == 0) {
+        f->eof = TRUE;
+        ret    = 0;
+    } else {
+        ret = r / size;
+    }
+
+    return ret;
+}
+
 int fclose(FILE *f)
 {
     fflush(f);
@@ -92,11 +137,9 @@ int fclose(FILE *f)
 int print(char const *str)
 {
     size_t len = 0;
-
     while (str[len] != '\0') {
         ++len;
     }
-
     return write(STDOUT_FILENO, str, len);
 }
 

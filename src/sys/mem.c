@@ -18,9 +18,10 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "mem.h"
-#include "string.h"
-#include "system.h"
+#include <mem.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/syscall.h>
 
 typedef struct __free_block {
     size_t               size;

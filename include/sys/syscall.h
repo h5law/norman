@@ -26,7 +26,7 @@ extern int syscall(int num, ...);
 
 // Use the same syscall number definitions for all architectures
 // Expand syscall number definitions to cover all calls
-// TODO: Enable overriding the syscall number definitions via a script
+// TODO: Enable overriding the syscall number definitions
 #define SYS_SYSCALL 0
 #define SYS_EXIT    1
 #define SYS_FORK    2

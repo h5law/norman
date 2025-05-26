@@ -18,15 +18,18 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef NORM_COMPILER_H
-#define NORM_COMPILER_H
+#include <stdlib.h>
+#include <sys/types.h>
 
-#ifdef __aarch64__
-#define ELFABI
-#else
-#error "Unsupported architecture"
-#endif /* #ifdef __arm64__ */
-
-#endif /* NORM_COMPILER_H */
+void reverse(char *str, size_t len)
+{
+    int start = 0;
+    int end   = len - 1;
+    while (start < end) {
+        SWAP(*(str + start), *(str + end));
+        start++;
+        end--;
+    }
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

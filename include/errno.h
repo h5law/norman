@@ -105,7 +105,7 @@ const char *const sys_errlist[] = {"No error",
 void  perror(const char *str);
 char *strerror(int errnum);
 
-int set_errno(int num);
+int _set_errno(int num);
 
 #endif /* ifndef NORM_ERR_H */
 

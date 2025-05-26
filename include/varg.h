@@ -25,19 +25,9 @@ typedef struct va_list {
     unsigned char *cur;
 } va_list;
 
-static void _VPOS_copy(va_list dest, va_list src)
-{
-    if (dest == src)
-        return;
-    if (dest.cur && src.cur)
-        dest.cur = src.cur;
-    return;
-}
-
-#define va_copy(dest, src) _VPOS_copy(dest, src)
-#define va_start(a, last)  ((a).cur = ( unsigned char * )(&(last)))
-#define va_arg(a, type)    (*(( type * )((a).cur = (a).cur + sizeof(type))))
-#define va_end(a)          ((a).cur = NULL)
+#define va_start(a, last) ((a).cur = ( unsigned char * )(&(last)))
+#define va_arg(a, type)   (*(( type * )((a).cur = (a).cur + sizeof(type))))
+#define va_end(a)         ((a).cur = NULL)
 
 #endif /* ifndef NORM_VARG_H */
 

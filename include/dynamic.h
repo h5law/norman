@@ -48,7 +48,7 @@ freely, subject to the following restrictions:
 #define NORM_DYN_ERR_UFLOW 4
 #define NORM_DYN_ERR_IIDX  5
 
-#include "system.h"
+#include <sys/types.h>
 
 struct norm_vector_t {
     // size: number of elements currently in the array

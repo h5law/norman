@@ -21,11 +21,15 @@ freely, subject to the following restrictions:
 #ifndef NORM_STRING_H
 #define NORM_STRING_H
 
-#include "system.h"
+#include <sys/types.h>
 
 void *memset(void *b, int c, size_t len);
 int   memcmp(const void *a, const void *b, size_t size);
+void *memmove(void *dst, const void *src, size_t size);
 int   memvacmp(void *memory, unsigned char val, size_t size);
+
+size_t strlen(const char *str);
+char  *strcpy(char *dest, const char *src);
 
 #endif /* ifndef NORM_STRING_H */
 

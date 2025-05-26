@@ -68,12 +68,15 @@ extern FILE *stderr;
 
 int read(unsigned int fd, char *buf, size_t buf_size);
 int write(unsigned int fd, const char *buf, size_t buf_size);
-int open(const char *path, int flag, ...);
+int open(const char *path, int flag, int mode);
 int close(unsigned int fd);
 
-FILE *fdopen(unsigned int fd, const char *mode);
-int   fflush(FILE *f);
-int   fclose(FILE *f);
+FILE  *fdopen(unsigned int fd, const char *mode);
+int    fflush(FILE *f);
+size_t fwrite(const void *buf, size_t size, size_t count, FILE *f);
+int    fputs(const char *str, FILE *f);
+size_t fread(void *buf, size_t size, size_t count, FILE *f);
+int    fclose(FILE *f);
 
 int print(const char *str);
 

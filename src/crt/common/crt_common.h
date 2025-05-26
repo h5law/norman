@@ -26,12 +26,6 @@ freely, subject to the following restrictions:
 
 #define NORM_CRT_CMN_H
 
-extern char              *__progname;
-extern char             **environ;
-extern struct ps_strings *__ps_strings;
-
-int main(int, char **, char **);
-
 #endif /* ifdef NORM_CRT_CMN_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

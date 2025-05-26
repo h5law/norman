@@ -18,31 +18,14 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-typedef void (*ctr_fn)(void);
+#include <stdlib.h>
 
-extern ctr_fn _init_array_start[0], _init_array_end[0];
-extern ctr_fn _fini_array_start[0], _fini_array_end[0];
-
-void _init(void)
+ldiv_t ldiv(long n, long base)
 {
-    for (ctr_fn *func = _init_array_start; func != _init_array_end; func++)
-        (*func)();
+    ldiv_t ret;
+    ret.quot = n / base;
+    ret.rem  = n % base;
+    return ret;
 }
-
-void _fini(void)
-{
-    for (ctr_fn *func = _fini_array_start; func != _fini_array_end; func++)
-        (*func)();
-}
-
-#ifdef __MACH__
-ctr_fn _init_array_start[0]
-        __attribute__((__used__, section("__DATA,.init_array")));
-ctr_fn _fini_array_start[0]
-        __attribute__((__used__, section("__DATA,.fini_array")));
-#else
-ctr_fn _init_array_start[0] __attribute__((__used__, section(".init_array")));
-ctr_fn _fini_array_start[0] __attribute__((__used__, section(".fini_array")));
-#endif
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

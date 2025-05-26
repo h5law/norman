@@ -21,6 +21,8 @@ freely, subject to the following restrictions:
 #ifndef NORM_STDLIB_H
 #define NORM_STDLIB_H
 
+#include <sys/types.h>
+
 #ifndef NULL
 #define NULL (( void * )0)
 #endif /* ifndef NULL */
@@ -60,10 +62,44 @@ struct rusage;
 extern int    envc;
 extern char **envp;
 
+#define SWAP(x, y)                                                             \
+    do {                                                                       \
+        x = x ^ y;                                                             \
+        y = x ^ y;                                                             \
+        x = x ^ y;                                                             \
+    } while (0)
+
+typedef struct {
+    int quot;
+    int rem;
+} div_t;
+
+typedef struct {
+    long quot;
+    long rem;
+} ldiv_t;
+
+#ifndef __environ_declared
+#define __environ_declared
+extern char **environ;
+extern char  *__progname;
+#endif /* ifndef __environ_declared */
+
 // syscall wrappers
 void exit(int status);
 void _Exit(int status);
 int  atexit(void (*func)(void));
+
+void reverse(char *str, size_t length);
+
+div_t  div(int n, int base);
+ldiv_t ldiv(long n, long base);
+int    mod(int n, int base);
+int    abs(int x);
+long   labs(long x);
+
+char *ltoa(long n, char *str, int base);
+char *itoa(int n, char *str, int base);
 
 int   fork(void);
 pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage);

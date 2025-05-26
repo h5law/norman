@@ -18,17 +18,11 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include <stdio.h>
-#include <string.h>
+#ifndef NORM_CRT_H
+#define NORM_CRT_H
 
-#include "utils.h"
+void __start(int argc, char **argv, char **envp);
 
-void assertf(int eval, char *desc)
-{
-    char *symbol = "❌";
-    if (eval == 1)
-        symbol = "✅";
-    printf("%s [%d]\t%s %s\n", __FILE__, __LINE__, symbol, desc);
-}
+#endif /* ifndef NORM_CRT_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

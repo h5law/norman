@@ -18,34 +18,8 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef NORM_SYS_TYPES_H
-#define NORM_SYS_TYPES_H
-
-#ifndef __size_t
-#define __size_t
-
-#ifndef __SIZE_T_DECLARED
-#define __SIZE_T_DECLARED
-typedef __SIZE_TYPE__ size_t;
-#endif /* ifndef __SIZE_T_DECLARED */
-
-#ifndef __SSIZE_T_DECLARED
-#define __SSIZE_T_DECLARED
-// use (unsigned -> signed) remapping for signed variant definition
-#define unsigned signed
-typedef __SIZE_TYPE__ ssize_t;
-#undef unsigned // unmap (unsigned -> signed) reverting to normal
-#endif          /* ifndef __SSIZE_T_DECLARED */
-
-#endif /* ifndef __size_t */
-
-#ifdef __LP64__
-#define __WORDSIZE 64
-#else
-#define __WORDSIZE                32
-#define __WORDSIZE32_SIZE_ULONG   0
-#define __WORDSIZE32_PTRDIFF_LONG 0
-#endif
+#ifndef NORM_STDINT_H
+#define NORM_STDINT_H
 
 #if __WORDSIZE == 64
 
@@ -73,6 +47,28 @@ typedef unsigned int uintptr_t;
 
 #endif /* if __WORDSIZE == 64 */
 
-#endif /* ifndef NORM_SYS_TYPES_H */
+// TODO: Ensure correct sizes across 32 and 64 bit architectures
+
+#ifndef __INT32_TYPE
+#define __INT32_TYPE
+typedef int int32_t;
+#endif /* ifndef __INT32_TYPE */
+
+#ifndef __UINT32_TYPE
+#define __UINT32_TYPE
+typedef unsigned int uint32_t;
+#endif /* ifndef __UINT32_TYPE */
+
+#ifndef __INT64_TYPE
+#define __INT64_TYPE
+typedef long int int64_t;
+#endif /* ifndef __INT64_TYPE */
+
+#ifndef __UINT64_TYPE
+#define __UINT64_TYPE
+typedef unsigned long int uint64_t;
+#endif /* ifndef __UINT64_TYPE */
+
+#endif /* ifndef NORM_STDINT_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

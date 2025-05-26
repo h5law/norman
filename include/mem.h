@@ -21,7 +21,7 @@ freely, subject to the following restrictions:
 #ifndef NORM_MEM_H
 #define NORM_MEM_H
 
-#include "system.h"
+#include <sys/types.h>
 
 int   brk(const void *addr);
 void *sbrk(int incr);

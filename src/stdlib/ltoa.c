@@ -18,31 +18,34 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-typedef void (*ctr_fn)(void);
+#include <stdlib.h>
 
-extern ctr_fn _init_array_start[0], _init_array_end[0];
-extern ctr_fn _fini_array_start[0], _fini_array_end[0];
-
-void _init(void)
+char *ltoa(long n, char *str, int base)
 {
-    for (ctr_fn *func = _init_array_start; func != _init_array_end; func++)
-        (*func)();
-}
+    long i          = 0;
+    int  isNegative = FALSE;
 
-void _fini(void)
-{
-    for (ctr_fn *func = _fini_array_start; func != _fini_array_end; func++)
-        (*func)();
-}
+    if (n == 0) {
+        str[i++] = '0';
+        str[i]   = '\0';
+        return str;
+    }
+    if (n < 0 && base == 10) {
+        isNegative = TRUE;
+        n          = -n;
+    }
+    while (n != 0) {
+        int rem   = mod(n, base);
+        str[i++]  = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        ldiv_t dt = ldiv(n, base);
+        n         = dt.quot;
+    }
+    if (isNegative)
+        str[i++] = '-';
+    str[i] = '\0';
+    reverse(str, i);
 
-#ifdef __MACH__
-ctr_fn _init_array_start[0]
-        __attribute__((__used__, section("__DATA,.init_array")));
-ctr_fn _fini_array_start[0]
-        __attribute__((__used__, section("__DATA,.fini_array")));
-#else
-ctr_fn _init_array_start[0] __attribute__((__used__, section(".init_array")));
-ctr_fn _fini_array_start[0] __attribute__((__used__, section(".fini_array")));
-#endif
+    return str;
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

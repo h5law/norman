@@ -18,7 +18,10 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "errno.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int errno = 0;
 
@@ -41,30 +44,30 @@ int set_errno(int num)
     return -1;
 }
 
-// void perror(const char *str)
-// {
-//     int _errno = errno;
-//     if (str && str[0]) {
-//         fputs(str, stderr);
-//         fputs(": ", stderr);
-//     }
-//     fputs(strerror(_errno), stderr);
-//     fputs("\n", stderr);
-//     fflush(stderr);
-// }
-//
-// static char _errbuf[128];
-//
-// char *strerror(int errnum)
-// {
-//     if (errnum < sys_nerr) {
-//         strcpy(_errbuf, sys_errlist[errnum]);
-//     } else {
-//         strcpy(_errbuf, "Error ");
-//         itoa(errnum, _errbuf + strlen(_errbuf), 10);
-//     }
-//
-//     return _errbuf;
-// }
+void perror(const char *str)
+{
+    int _errno = errno;
+    if (str && str[0]) {
+        fputs(str, stderr);
+        fputs(": ", stderr);
+    }
+    fputs(strerror(_errno), stderr);
+    fputs("\n", stderr);
+    fflush(stderr);
+}
+
+static char _errbuf[128];
+
+char *strerror(int errnum)
+{
+    if (errnum < sys_nerr) {
+        strcpy(_errbuf, sys_errlist[errnum]);
+    } else {
+        strcpy(_errbuf, "Error ");
+        itoa(errnum, _errbuf + strlen(_errbuf), 10);
+    }
+
+    return _errbuf;
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell
