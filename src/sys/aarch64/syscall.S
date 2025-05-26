@@ -1,6 +1,6 @@
     .global syscall
 
-    .section __DATA,.syscall
+    .section __DATA,syscall
     .align 8
     ; .type syscall, @function
 syscall:

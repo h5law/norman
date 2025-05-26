@@ -4,3 +4,4 @@ build/
 zig-out/
 .cache/*/**
 .idea/*/**
+lib/*.a
