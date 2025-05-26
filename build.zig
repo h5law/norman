@@ -16,6 +16,32 @@ pub fn build(b: *std.Build) void {
         },
     }
 
+    const nlibc = b.addStaticLibrary(.{
+        .name = "nlibc",
+        .target = target,
+        .optimize = optimize,
+        .link_libc = false,
+    });
+
+    nlibc.addCSourceFiles(.{
+        .files = &[_][]const u8{
+            "src/syscall-arm64.S",
+            "src/system.c",
+            "src/errno.c",
+            "src/stdio.c",
+            "src/mem.c",
+            "src/string.c",
+        },
+        .flags = &[_][]const u8{
+            "-nostdinc",
+            "-fno-builtin",
+            "-ffreestanding",
+            "-fno-stack-protector",
+        },
+    });
+
+    b.installArtifact(nlibc);
+
     // Create the demo executable
     const demo = b.addExecutable(.{
         .name = "demo",
@@ -27,12 +53,6 @@ pub fn build(b: *std.Build) void {
     // Set source files and build flags
     demo.addCSourceFiles(.{
         .files = &[_][]const u8{
-            "src/syscall-arm64.S",
-            "src/system.c",
-            "src/errno.c",
-            "src/stdio.c",
-            "src/mem.c",
-            "src/string.c",
             "tests/syscalls.c",
         },
         .flags = &[_][]const u8{
@@ -42,6 +62,8 @@ pub fn build(b: *std.Build) void {
             "-fno-stack-protector",
         },
     });
+
+    demo.linkLibrary(nlibc);
 
     b.installArtifact(demo);
 
