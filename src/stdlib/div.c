@@ -38,6 +38,7 @@ int mod(int n, int base)
     if (is_power_2)
         return n & (base - 1);
 
+    // Handle 2^x - 1 bases
     unsigned int m;
     if (is_power_2_minus) {
         int                leading_zeroes = __builtin_clz(base + 1);

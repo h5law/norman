@@ -20,27 +20,45 @@ freely, subject to the following restrictions:
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/syscall.h>
 
 #include "../common/crt_common.h"
+#include "crt.h"
 
 extern int main(int argc, char **argv);
 
 FILE *stdin, *stdout, *stderr;
 
+// void __start(int argc, char **argv, char **envp)
+// {
+//     __progname = argv[0];
+//     environ    = envp;
+//
+//     stdin  = fdopen(STDIN_FILENO, "r");
+//     stdout = fdopen(STDOUT_FILENO, "w");
+//     stderr = fdopen(STDERR_FILENO, "w");
+//
+//     // TODO: Set up default signal handlers
+//     // signal(SIGINT, SIG_DFL);
+//     // signal(SIGSEGV, SIG_DFL);
+//     // signal(SIGTERM, SIG_DFL);
+//
+//     exit(main(argc, argv));
+// }
+
 void __start(int argc, char **argv, char **envp)
 {
+    syscall(SYS_WRITE, 2, "In __start\n", 11);
     __progname = argv[0];
     environ    = envp;
-
-    stdin  = fdopen(STDIN_FILENO, "r");
+    syscall(SYS_WRITE, 2, "Before fdopen\n", 14);
+    stdin = fdopen(STDIN_FILENO, "r");
+    syscall(SYS_WRITE, 2, "After stdin\n", 12);
     stdout = fdopen(STDOUT_FILENO, "w");
+    syscall(SYS_WRITE, 2, "After stdout\n", 13);
     stderr = fdopen(STDERR_FILENO, "w");
-
-    // TODO: Set up default signal handlers
-    // signal(SIGINT, SIG_DFL);
-    // signal(SIGSEGV, SIG_DFL);
-    // signal(SIGTERM, SIG_DFL);
-
+    syscall(SYS_WRITE, 2, "After stderr\n", 13);
+    syscall(SYS_WRITE, 2, "Calling main\n", 13);
     exit(main(argc, argv));
 }
 

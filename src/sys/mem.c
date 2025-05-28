@@ -23,79 +23,110 @@ freely, subject to the following restrictions:
 #include <string.h>
 #include <sys/syscall.h>
 
-typedef struct __free_block {
-    size_t               size;
-    struct __free_block *next;
-} free_block;
+// typedef struct __free_block {
+//     size_t               size;
+//     struct __free_block *next;
+// } free_block;
+//
+// static free_block free_block_list_head = {0, NULL};
+// // memory block width alignment size: machine word size in bits
+// static const size_t align_to = sizeof(uintptr_t) * 8;
+//
+// int brk(const void *addr)
+// {
+//     int x = syscall(SYS_BRK, ( unsigned long )addr);
+//     return (( unsigned long )x > ( unsigned long )addr) ? 0 : -1;
+// }
+//
+// void *sbrk(int incr)
+// {
+//     void *old = ( void * )(( uintptr_t )syscall(SYS_BRK, 0));
+//     void *new = ( void * )( uintptr_t )syscall(
+//             SYS_BRK, ( uintptr_t )old + ( uintptr_t )incr);
+//     return ((( uintptr_t )new) == ((( uintptr_t )old) + ( uintptr_t )incr))
+//                    ? old
+//                    : (( void * )-1);
+// }
+//
+// void *malloc(size_t size)
+// {
+//     size = (size + sizeof(size_t) + (align_to - 1)) & ~(align_to - 1);
+//     free_block  *block = free_block_list_head.next;
+//     free_block **head  = &(free_block_list_head.next);
+//     while (block) {
+//         if (block->size >= size) {
+//             *head = block->next;
+//             return (( char * )block) + sizeof(size_t);
+//         }
+//         head  = &(block->next);
+//         block = block->next;
+//     }
+//
+//     block       = ( free_block * )sbrk(size);
+//     block->size = size;
+//     memset((( char * )block) + sizeof(size_t), 0, size);
+//
+//     return (( char * )block) + sizeof(size_t);
+// }
+//
+// void *calloc(size_t count, size_t size)
+// {
+//     size = (size + sizeof(size_t) + (align_to - 1)) & ~(align_to - 1);
+//     free_block  *block = free_block_list_head.next;
+//     free_block **head  = &(free_block_list_head.next);
+//     while (block) {
+//         if (block->size >= size) {
+//             *head = block->next;
+//             memset((( char * )block) + sizeof(size_t), 0, size);
+//             return (( char * )block) + sizeof(size_t);
+//         }
+//         head  = &(block->next);
+//         block = block->next;
+//     }
+//
+//     block       = ( free_block * )sbrk(size);
+//     block->size = size;
+//     memset((( char * )block) + sizeof(size_t), 0, size);
+//
+//     return (( char * )block) + sizeof(size_t);
+// }
+//
+// void free(void *ptr)
+// {
+//     free_block *block = ( free_block * )((( char * )ptr) - sizeof(size_t));
+//     block->next       = free_block_list_head.next;
+//     free_block_list_head.next = block;
+// }
 
-static free_block free_block_list_head = {0, NULL};
-// memory block width alignment size: machine word size in bits
-static const size_t align_to = sizeof(uintptr_t) * 8;
+#define PROT_READ   0x1
+#define PROT_WRITE  0x2
+#define MAP_PRIVATE 0x2
+#define MAP_ANON    0x1000
 
-int brk(const void *addr)
+static char  heap[0x10000] __attribute__((aligned(0x1000))); // 64KB heap
+static void *heap_end = heap;
+
+void *sbrk(int increment)
 {
-    int x = syscall(SYS_BRK, ( unsigned long )addr);
-    return (( unsigned long )x > ( unsigned long )addr) ? 0 : -1;
-}
-
-void *sbrk(int incr)
-{
-    void *old = ( void * )(( uintptr_t )syscall(SYS_BRK, 0));
-    void *new = ( void * )( uintptr_t )syscall(
-            SYS_BRK, ( uintptr_t )old + ( uintptr_t )incr);
-    return ((( uintptr_t )new) == ((( uintptr_t )old) + ( uintptr_t )incr))
-                   ? old
-                   : (( void * )-1);
+    void *old_end = heap_end;
+    void *new_end = ( void * )(( char * )heap_end + increment);
+    if (( char * )new_end > heap + sizeof(heap)) {
+        syscall(SYS_WRITE, 2, "sbrk: out of memory\n", 20);
+        return ( void * )-1;
+    }
+    heap_end = new_end;
+    return old_end;
 }
 
 void *malloc(size_t size)
 {
-    size = (size + sizeof(size_t) + (align_to - 1)) & ~(align_to - 1);
-    free_block  *block = free_block_list_head.next;
-    free_block **head  = &(free_block_list_head.next);
-    while (block) {
-        if (block->size >= size) {
-            *head = block->next;
-            return (( char * )block) + sizeof(size_t);
-        }
-        head  = &(block->next);
-        block = block->next;
-    }
-
-    block       = ( free_block * )sbrk(size);
-    block->size = size;
-    memset((( char * )block) + sizeof(size_t), 0, size);
-
-    return (( char * )block) + sizeof(size_t);
+    if (size == 0)
+        return NULL;
+    void *ptr = sbrk(size);
+    if (ptr == ( void * )-1)
+        return NULL;
+    return ptr;
 }
 
-void *calloc(size_t count, size_t size)
-{
-    size = (size + sizeof(size_t) + (align_to - 1)) & ~(align_to - 1);
-    free_block  *block = free_block_list_head.next;
-    free_block **head  = &(free_block_list_head.next);
-    while (block) {
-        if (block->size >= size) {
-            *head = block->next;
-            memset((( char * )block) + sizeof(size_t), 0, size);
-            return (( char * )block) + sizeof(size_t);
-        }
-        head  = &(block->next);
-        block = block->next;
-    }
-
-    block       = ( free_block * )sbrk(size);
-    block->size = size;
-    memset((( char * )block) + sizeof(size_t), 0, size);
-
-    return (( char * )block) + sizeof(size_t);
-}
-
-void free(void *ptr)
-{
-    free_block *block = ( free_block * )((( char * )ptr) - sizeof(size_t));
-    block->next       = free_block_list_head.next;
-    free_block_list_head.next = block;
-}
-
+void free(void *ptr) {}
 // vim: ft=c ts=4 sts=4 sw=4 et ai cin

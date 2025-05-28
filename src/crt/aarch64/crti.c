@@ -35,14 +35,10 @@ void _fini(void)
         (*func)();
 }
 
-#ifdef __MACH__
-ctr_fn _init_array_start[0]
-        __attribute__((__used__, section("__DATA,.init_array")));
-ctr_fn _fini_array_start[0]
-        __attribute__((__used__, section("__DATA,.fini_array")));
-#else
-ctr_fn _init_array_start[0] __attribute__((__used__, section(".init_array")));
-ctr_fn _fini_array_start[0] __attribute__((__used__, section(".fini_array")));
-#endif
+ctr_fn _init_array_start[0] __attribute__((
+        __used__, section(".init_array,\"ax\""), aligned(sizeof(ctr_fn)))) = {};
+ctr_fn _fini_array_start[0] __attribute__((
+        __used__, section(".fini_array,\"ax\""), aligned(sizeof(ctr_fn)))) = {};
+;
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

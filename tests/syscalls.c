@@ -17,9 +17,6 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
  */
-/* simple syscall (syscall-arm64.S + system.h) test program
- * СИГМА - БАСЕД ДЕВ
- */
 
 #include <stdio.h>
 #include <sys/types.h>

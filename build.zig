@@ -16,29 +16,46 @@ pub fn build(b: *std.Build) void {
         },
     }
 
-    const nlibc = b.addStaticLibrary(.{
+    const flags = [_][]const u8{
+        "-I./include/",
+    };
+    const cflags = flags ++ [_][]const u8{
+        "-nostdinc",
+        "-nostdlib",
+        "-fno-builtin",
+        "-ffreestanding",
+        "-fno-stack-protector",
+    };
+
+    const nlibc = b.addLibrary(.{
+        .root_module = ".",
+        .linkage = .static,
         .name = "nlibc",
-        .target = target,
-        .optimize = optimize,
-        .link_libc = false,
     });
 
-    nlibc.addCSourceFiles(.{
-        .files = &[_][]const u8{
-            "src/syscall-arm64.S",
-            "src/system.c",
-            "src/errno.c",
-            "src/stdio.c",
-            "src/mem.c",
-            "src/string.c",
-        },
-        .flags = &[_][]const u8{
-            "-nostdinc",
-            "-fno-builtin",
-            "-ffreestanding",
-            "-fno-stack-protector",
-        },
-    });
+    var nlibcSources = std.ArrayList([]const u8).init(b.allocator);
+    {
+        var dir = try std.fs.cwd().openDir("src", .{ .iterate = true });
+
+        var walker = try dir.walk(b.allocator);
+        defer walker.deinit();
+
+        const allowed_dirs = [_][]const u8{
+            "stdio", "stdlib", "string", "sys",
+        };
+        while (try walker.next()) |entry| {
+            const ext = std.fs.path.extension(entry.basename);
+            const include_file = for (allowed_dirs) |e| {
+                if (std.mem.eql(u8, ext, e))
+                    break true;
+            } else false;
+            if (include_file) {
+                try nlibcSources.append(b.pathJoin("src", entry.path));
+            }
+        }
+    }
+
+    nlibc.addCSourceFiles(nlibcSources.items, &cflags);
 
     b.installArtifact(nlibc);
 
@@ -55,12 +72,7 @@ pub fn build(b: *std.Build) void {
         .files = &[_][]const u8{
             "tests/syscalls.c",
         },
-        .flags = &[_][]const u8{
-            "-nostdinc",
-            "-fno-builtin",
-            "-ffreestanding",
-            "-fno-stack-protector",
-        },
+        .options = &cflags,
     });
 
     demo.linkLibrary(nlibc);
