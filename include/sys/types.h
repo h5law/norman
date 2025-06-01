@@ -37,7 +37,7 @@ typedef __SIZE_TYPE__ ssize_t;
 #undef unsigned // unmap (unsigned -> signed) reverting to normal
 #endif          /* ifndef __SSIZE_T_DECLARED */
 
-#endif /* ifndef __size_t */
+#endif          /* ifndef __size_t */
 
 #ifdef __LP64__
 #define __WORDSIZE 64
@@ -70,8 +70,13 @@ typedef int intptr_t;
 #define __uintptr_t_defined
 typedef unsigned int uintptr_t;
 #endif /* uifndef __intptr_t_defined */
-
 #endif /* if __WORDSIZE == 64 */
+
+#ifndef _PID_T_DECLARED
+typedef int     __pid_t;
+typedef __pid_t pid_t; /* process id */
+#define _PID_T_DECLARED
+#endif
 
 #endif /* ifndef NORM_SYS_TYPES_H */
 

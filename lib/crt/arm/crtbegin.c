@@ -18,35 +18,16 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef NORM_CRTBEGIN_H
+#define NORM_CRTBEGIN_H
 
-#ifndef NORM_SYSCALL_H
-#define NORM_SYSCALL_H
+typedef void (*fini_fn)(void);
 
-#ifndef __syscall_declared
-#define __syscall_declared
-// defined in the assembler
-extern int syscall(int num, ...);
-#endif /* ifndef __syscall_declared */
+fini_fn _init_array_end[0] __attribute__((used, section(".init_array"),
+                                          aligned(sizeof(fini_fn)))) = {};
+fini_fn _fini_array_end[0] __attribute__((used, section(".fini_array"),
+                                          aligned(sizeof(fini_fn)))) = {};
 
-// Use the same syscall number definitions for all architectures
-// Expand syscall number definitions to cover all calls
-// TODO: Enable overriding the syscall number definitions
-#define SYS_SYSCALL 0x20000000
-#define SYS_EXIT    0x20000001
-#define SYS_FORK    0x20000002
-#define SYS_READ    0x20000003
-#define SYS_WRITE   0x20000004
-#define SYS_OPEN    0x20000005
-#define SYS_CLOSE   0x20000006
-#define SYS_WAIT4   7
-#define SYS_CHDIR   8
-#define SYS_EXECVE  9
-#define SYS_BRK     10
-#define SYS_SBRK    11
-#define SYS_MMAP    0x200000C5
-// ...
-
-#endif /* ifndef NORM_SYSCALL_H */
+#endif /* ifndef NORM_CRTN_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

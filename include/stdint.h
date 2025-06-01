@@ -25,29 +25,49 @@ freely, subject to the following restrictions:
 
 #ifndef __intptr_t_defined
 #define __intptr_t_defined
-typedef long int intptr_t;
+typedef long long intptr_t;
 #endif /* ifndef __intptr_t_defined */
 
 #ifndef __uintptr_t_defined
 #define __uintptr_t_defined
-typedef unsigned long int uintptr_t;
+typedef unsigned long long uintptr_t;
 #endif /* uifndef __intptr_t_defined */
 
 #else
 
 #ifndef __intptr_t_defined
 #define __intptr_t_defined
-typedef int intptr_t;
+typedef long intptr_t;
 #endif /* ifndef __intptr_t_defined */
 
 #ifndef __uintptr_t_defined
 #define __uintptr_t_defined
-typedef unsigned int uintptr_t;
+typedef unsigned long uintptr_t;
 #endif /* uifndef __intptr_t_defined */
 
 #endif /* if __WORDSIZE == 64 */
 
 // TODO: Ensure correct sizes across 32 and 64 bit architectures
+
+#ifndef __INT8_TYPE
+#define __INT8_TYPE
+typedef char int8_t;
+#endif /* ifndef __INT8_TYPE */
+
+#ifndef __UINT8_TYPE
+#define __UINT8_TYPE
+typedef unsigned char uint8_t;
+#endif /* ifndef __UINT8_TYPE */
+
+#ifndef __INT16_TYPE
+#define __INT16_TYPE
+typedef short int16_t;
+#endif /* ifndef __INT16_TYPE */
+
+#ifndef __UINT16_TYPE
+#define __UINT16_TYPE
+typedef unsigned short uint16_t;
+#endif /* ifndef __UINT16_TYPE */
 
 #ifndef __INT32_TYPE
 #define __INT32_TYPE
@@ -61,12 +81,12 @@ typedef unsigned int uint32_t;
 
 #ifndef __INT64_TYPE
 #define __INT64_TYPE
-typedef long int int64_t;
+typedef long long int64_t;
 #endif /* ifndef __INT64_TYPE */
 
 #ifndef __UINT64_TYPE
 #define __UINT64_TYPE
-typedef unsigned long int uint64_t;
+typedef unsigned long long uint64_t;
 #endif /* ifndef __UINT64_TYPE */
 
 #endif /* ifndef NORM_STDINT_H */

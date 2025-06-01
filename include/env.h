@@ -18,35 +18,19 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef NORM_ENV_H
+#define NORM_ENV_H
 
-#ifndef NORM_SYSCALL_H
-#define NORM_SYSCALL_H
+#ifndef __ENVIRON_DECLARED
+#define __ENVIRON_DECLARED
+extern char **environ;
+#endif /* ifndef __ENVIRON_DECLARED */
 
-#ifndef __syscall_declared
-#define __syscall_declared
-// defined in the assembler
-extern int syscall(int num, ...);
-#endif /* ifndef __syscall_declared */
+#ifndef __PROGNAME_DECLARED
+#define __PROGNAME_DECLARED
+extern char *__progname;
+#endif /* ifndef __PROGNAME_DECLARED */
 
-// Use the same syscall number definitions for all architectures
-// Expand syscall number definitions to cover all calls
-// TODO: Enable overriding the syscall number definitions
-#define SYS_SYSCALL 0x20000000
-#define SYS_EXIT    0x20000001
-#define SYS_FORK    0x20000002
-#define SYS_READ    0x20000003
-#define SYS_WRITE   0x20000004
-#define SYS_OPEN    0x20000005
-#define SYS_CLOSE   0x20000006
-#define SYS_WAIT4   7
-#define SYS_CHDIR   8
-#define SYS_EXECVE  9
-#define SYS_BRK     10
-#define SYS_SBRK    11
-#define SYS_MMAP    0x200000C5
-// ...
-
-#endif /* ifndef NORM_SYSCALL_H */
+#endif /* ifndef NORM_ENV_H */
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

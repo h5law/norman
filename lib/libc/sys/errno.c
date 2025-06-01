@@ -18,35 +18,45 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#ifndef NORM_SYSCALL_H
-#define NORM_SYSCALL_H
+int errno = 0;
 
-#ifndef __syscall_declared
-#define __syscall_declared
-// defined in the assembler
-extern int syscall(int num, ...);
-#endif /* ifndef __syscall_declared */
+int set_errno(int num)
+{
+    errno = num;
+    return -1;
+}
 
-// Use the same syscall number definitions for all architectures
-// Expand syscall number definitions to cover all calls
-// TODO: Enable overriding the syscall number definitions
-#define SYS_SYSCALL 0x20000000
-#define SYS_EXIT    0x20000001
-#define SYS_FORK    0x20000002
-#define SYS_READ    0x20000003
-#define SYS_WRITE   0x20000004
-#define SYS_OPEN    0x20000005
-#define SYS_CLOSE   0x20000006
-#define SYS_WAIT4   7
-#define SYS_CHDIR   8
-#define SYS_EXECVE  9
-#define SYS_BRK     10
-#define SYS_SBRK    11
-#define SYS_MMAP    0x200000C5
-// ...
+void perror(const char *str)
+{
+    int _errno = errno;
 
-#endif /* ifndef NORM_SYSCALL_H */
+    if (str && str[0]) {
+        fputs(str, stderr);
+        fputs(": ", stderr);
+    }
+
+    fputs(strerror(_errno), stderr);
+    fputs("\n", stderr);
+    fflush(stderr);
+}
+
+static char _errbuf[128];
+
+char *strerror(int errnum)
+{
+    if (errnum < sys_nerr) {
+        strcpy(_errbuf, sys_errlist[errnum]);
+    } else {
+        strcpy(_errbuf, "Error ");
+        itoa(errnum, _errbuf + strlen(_errbuf), 10);
+    }
+
+    return _errbuf;
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

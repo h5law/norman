@@ -5,17 +5,35 @@ ColumnLimit: 80
 ContinuationIndentWidth: 8
 IndentCaseLabels: false
 
-AlignAfterOpenBracket: Align
-BraceWrapping:
-  AfterFunction: true
-  AfterControlStatement: false
-  AfterEnum: false
-  AfterStruct: false
-  AfterUnion: false
-AlwaysBreakAfterReturnType: None
-BreakBeforeBraces: Linux
+SortIncludes: false
+IncludeBlocks: Preserve
 
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Left
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignFunctionDeclarations: true
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
 PointerAlignment: Right
+
 SpaceAfterCStyleCast: false
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
@@ -24,9 +42,13 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
-AlignConsecutiveMacros: true
-AlignTrailingComments: true
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterStruct: false
+  AfterUnion: true
+AlwaysBreakAfterReturnType: None
+BreakBeforeBraces: Linux
 
 MaxEmptyLinesToKeep: 1

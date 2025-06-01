@@ -1,43 +1,46 @@
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
-unexport LIBRARY_PATH C_INCLUDE_PATH
 
-SRC_DIR=src
-TEST_DIR=tests
-BUILD_DIR=build
-INCLUDE_DIR=include
 LIB_DIR=lib
+BUILD_DIR=build
+TEST_DIR=tests
+INCLUDE_DIR=include
 
-ARCH := $(shell uname -m | sed 's/arm64/aarch64/')
-ifneq ($(ARCH),arm64)
-ifneq ($(ARCH),aarch64)
-    $(error Unsupported architecture: $(ARCH))
-endif
-endif
+ARCH=arm
 
-CRT_PRE=$(SRC_DIR)/crt/build/crt0.o $(SRC_DIR)/crt/build/crti.o $(SRC_DIR)/crt/build/crtbegin.o
-CRT_POST=$(SRC_DIR)/crt/build/crtend.o $(SRC_DIR)/crt/build/crtn.o
+CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb
+AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mthumb
+AR=/usr/local/bin/arm-none-eabi-ar
+LD=/usr/local/bin/arm-none-eabi-ld
+
+CFLAGS=-O3 -nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -specs=${NORM_PATH}/nlibc.specs
+LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
+
+CRT_PRE=$(LIB_DIR)/crt/build/crt0.o $(LIB_DIR)/crt/build/crti.o
+CRT_POST=$(LIB_DIR)/crt/build/crtn.o
 
 .PHONY: clean build demo always
 
 always:
-	mkdir -pv $(SRC_DIR)
+	mkdir -pv $(LIB_DIR)
 	mkdir -pv $(TEST_DIR)
 	mkdir -pv $(BUILD_DIR)
 	mkdir -pv $(INCLUDE_DIR)
-	mkdir -pv $(LIB_DIR)
 
-nlibc: ${NORM_PATH}/$(SRC_DIR)
-	make clean build clean_src -C ${NORM_PATH}/$(SRC_DIR)
+nlibc: ${NORM_PATH}/$(LIB_DIR)/libc
+	make clean build clean_src -C ${NORM_PATH}/$(LIB_DIR)/libc
 
-crt: ${NORM_PATH}/$(SRC_DIR)/crt
-	make clean build -C ${NORM_PATH}/$(SRC_DIR)/crt
+crt: ${NORM_PATH}/$(LIB_DIR)/crt
+	make clean build -C $(LIB_DIR)/crt
 
-$(BUILD_DIR)/demo: always nlibc crt $(TEST_DIR)/syscalls.c
-	$(CC) $(CFLAGS) $(LFLAGS) -o $(BUILD_DIR)/demo -Ur $(CRT_PRE) $(TEST_DIR)/syscalls.c $(CRT_POST)
+$(BUILD_DIR)/demo.o: $(TEST_DIR)/demo.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/demo.o -c $(TEST_DIR)/demo.c
 
-build: clean always nlibc crt $(BUILD_DIR)/demo
+demo: always nlibc crt $(BUILD_DIR)/demo.o $(LIB_DIR)/libc/sys/$(ARCH)/syscall.o
+	$(CC) $(CFLAGS) $(LFLAGS) -nostartfiles -o $(BUILD_DIR)/demo -Ur $(CRT_PRE) $(BUILD_DIR)/demo.o $(LIB_DIR)/libc/sys/$(ARCH)/syscall.o $(CRT_POST)
 
-clean: ${NORM_PATH}/$(SRC_DIR) ${NORM_PATH}/$(SRC_DIR)/crt
-	make clean -C ${NORM_PATH}/$(SRC_DIR)
-	make clean -C ${NORM_PATH}/$(SRC_DIR)/crt
+build: clean always nlibc crt demo
+
+clean: $(LIB_DIR)/libc $(LIB_DIR)/crt
+	make clean -C ${NORM_PATH}/lib/libc
+	make clean -C ${NORM_PATH}/lib/crt
 	rm -vfrd $(BUILD_DIR)
