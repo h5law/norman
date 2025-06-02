@@ -79,6 +79,9 @@ size_t fread(void *buf, size_t size, size_t count, FILE *f);
 int    fclose(FILE *f);
 
 int print(const char *str);
+int fputc(const char c, FILE *f);
+int putc(const char c, FILE *f);
+int putchar(int c);
 
 #endif /* ifndef NORM_STDIO_H */
 
