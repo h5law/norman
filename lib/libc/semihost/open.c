@@ -19,6 +19,7 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
 #include <sys/types.h>
 #include <errno.h>
 
@@ -56,13 +57,13 @@ int open(const char *pathname, int flags, int mode)
     }
 
     /* Make sure any stdout/stderr fds are allocated first */
-    ( void )_map_stdio(0); // NOTE: Is this necessary?
+    ( void )semihost_map_stdio(0); // NOTE: Is this necessary?
     int ret;
     do {
-        ret = sys_semihost_open(pathname, semiflags);
+        ret = semihost_open(pathname, semiflags);
     } while (0 <= ret && ret <= 2);
     if (ret == -1)
-        errno = sys_semihost_errno();
+        errno = semihost_errno();
     // else if (&__semihost_creat_time && gettimeofday)
     //     gettimeofday(&__semihost_creat_time, NULL);
 

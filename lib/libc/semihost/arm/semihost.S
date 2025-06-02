@@ -18,17 +18,16 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
     .syntax unified
-    .arch armv8-m.main
 
     .section .semihost
     .align 4
     .p2align 4,,15
-    .globl sys_semihost
-    .type sys_semihost,%function
+    .globl semihost
+    .type semihost,%function
 #ifdef __thumb__
       .thumb
 #endif
-sys_semihost:
+semihost:
 #if __ARM_ARCH_PROFILE == 'M'
       bkpt #0xab
 #else
@@ -39,6 +38,6 @@ sys_semihost:
 #endif
 #endif
       bx lr
-      .size sys_semihost, . - sys_semihost
+      .size semihost, . - semihost
 
 // vim: ft=asm ts=4 sts=4 sw=4 et ai cin

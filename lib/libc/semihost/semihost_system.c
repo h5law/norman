@@ -19,7 +19,11 @@
  */
 
 #include <semihost/shdefs.h>
+#include <string.h>
 
-uintptr_t sys_semihost_time(void) { return sys_semihost(SYS_TIME, 0); }
+int semihost_system(const char *command)
+{
+    return ( int )semihost2(SH_SYSTEM, ( uintptr_t )command, strlen(command));
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

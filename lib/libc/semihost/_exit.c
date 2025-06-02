@@ -19,10 +19,22 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
+#include <sys/cdefs.h>
+#include <unistd.h>
 
-int sys_semihost_iserror(intptr_t status)
+__noreturn void _exit(int code)
 {
-    return ( int )sys_semihost1(SYS_ISERROR, status);
+    if (semihost_feature(SH_EXT_EXIT_EXTENDED)) {
+        semihost_exit_extended(code);
+    } else {
+        uintptr_t value;
+        if (code == 0)
+            value = ADP_Stopped_ApplicationExit;
+        else
+            value = ADP_Stopped_RunTimeErrorUnknown;
+        semihost_exit(value, code);
+    }
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

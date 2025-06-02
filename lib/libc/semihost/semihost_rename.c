@@ -18,14 +18,22 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include <stdint.h>
 #include <semihost/shdefs.h>
+#include <string.h>
 
-int sys_semihost_putc(char c, FILE *file)
+int semihost_rename(const char *old_pathname, const char *new_pathname)
 {
-    ( void )file;
-    sys_semihost(SYS_WRITEC, ( uintptr_t )&c);
-    return ( unsigned char )c;
+    struct {
+        sh_param_t field1;
+        sh_param_t field2;
+        sh_param_t field3;
+        sh_param_t field4;
+    } arg = {.field1 = ( sh_param_t )( uintptr_t )old_pathname,
+             .field2 = strlen(old_pathname),
+             .field3 = ( sh_param_t )( uintptr_t )new_pathname,
+             .field4 = strlen(new_pathname)};
+
+    return ( int )semihost(SH_RENAME, ( uintptr_t )&arg);
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

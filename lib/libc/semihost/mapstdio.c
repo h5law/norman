@@ -19,8 +19,30 @@
  */
 
 #include <semihost/shdefs.h>
-#include <stdint.h>
+#include <semihost/calls.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-uintptr_t sys_semihost_clock(void) { return sys_semihost(SYS_CLOCK, 0); }
+static int fd_stdout, fd_stderr;
+static int _check_done;
+
+int semihost_map_stdio(int fd)
+{
+    if (!_check_done) {
+        _check_done = 1;
+        fd_stdout   = semihost_open(":tt", 4);
+        fd_stderr   = semihost_open(":tt", 8);
+    }
+    switch (fd) {
+    case 0:
+        return -1;
+    case 1:
+        return fd_stdout;
+    case 2:
+        return fd_stderr;
+    default:
+        return fd;
+    }
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

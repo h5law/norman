@@ -19,16 +19,12 @@
  */
 
 #include <semihost/shdefs.h>
-#include <stdint.h>
-#include <sys/cdefs.h>
+#include <string.h>
 
-__noreturn void sys_semihost_exit(uintptr_t exception, uintptr_t subcode)
+int semihost_open(const char *pathname, int semiflags)
 {
-    if (sizeof(sh_param_t) == 8) {
-        ( void )sys_semihost2(SYS_EXIT, exception, subcode);
-    } else
-        ( void )sys_semihost(SYS_EXIT, exception);
-    __builtin_unreachable();
+    return ( int )semihost3(SH_OPEN, ( sh_param_t )( uintptr_t )pathname,
+                            semiflags, strlen(pathname));
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

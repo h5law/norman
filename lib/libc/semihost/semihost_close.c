@@ -19,13 +19,8 @@
  */
 
 #include <semihost/shdefs.h>
-#include <stdint.h>
+#include <semihost/calls.h>
 
-int sys_semihost_getc(FILE *file)
-{
-    ( void )file;
-    uint8_t ch = sys_semihost(SYS_READC, 0);
-    return ch;
-}
+int semihost_close(int fd) { return ( int )semihost1(SH_CLOSE, fd); }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

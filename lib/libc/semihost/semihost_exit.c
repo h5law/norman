@@ -19,8 +19,23 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
 #include <stdint.h>
+#include <sys/cdefs.h>
 
-int sys_semihost_errno(void) { return sys_semihost(SYS_ERRNO, 0); }
+__noreturn void semihost_exit(uintptr_t exception, uintptr_t subcode)
+{
+    if (sizeof(sh_param_t) == 8) {
+        ( void )semihost2(SH_EXIT, exception, subcode);
+    } else
+        ( void )semihost(SH_EXIT, exception);
+    __builtin_unreachable();
+}
+
+__noreturn void semihost_exit_extended(uintptr_t code)
+{
+    ( void )semihost2(SH_EXIT_EXTENDED, ADP_Stopped_ApplicationExit, code);
+    __builtin_unreachable();
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

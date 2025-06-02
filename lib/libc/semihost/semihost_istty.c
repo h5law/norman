@@ -19,11 +19,8 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
 
-int sys_semihost_tmpnam(char *pathname, int identifier, int maxpath)
-{
-    return ( int )sys_semihost3(SYS_TMPNAM, ( sh_param_t )( uintptr_t )pathname,
-                                identifier, maxpath);
-}
+int semihost_istty(int fd) { return ( int )semihost1(SH_ISTTY, fd); }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

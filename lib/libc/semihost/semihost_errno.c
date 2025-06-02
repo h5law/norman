@@ -20,17 +20,7 @@
 
 #include <semihost/shdefs.h>
 #include <semihost/calls.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
 
-ssize_t write(int fd, const char *buf, size_t count)
-{
-    fd            = semihost_map_stdio(fd);
-    uintptr_t ret = semihost_write(fd, buf, count);
-
-    ssize_t put   = ( ssize_t )(count - ret);
-    return put;
-}
+int semihost_errno(void) { return semihost(SH_ERRNO, 0); }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

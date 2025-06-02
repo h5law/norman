@@ -19,20 +19,25 @@
  */
 
 #include <semihost/shdefs.h>
-#include <string.h>
+#include <semihost/calls.h>
+#include <stdint.h>
 
-int sys_semihost_get_cmdline(char *buf, int size)
+uint64_t semihost_elapsed(void)
 {
-    struct {
-        sh_param_t field1;
-        sh_param_t field2;
-    } arg         = {.field1 = ( sh_param_t )( uintptr_t )buf, .field2 = size};
-    uintptr_t ret = sys_semihost(SYS_GET_CMDLINE, ( uintptr_t )&arg);
-    if (ret == 0) {
-        if (arg.field1 != ( sh_param_t )( uintptr_t )buf)
-            strcpy(buf, ( void * )( uintptr_t )arg.field1);
+    if (sizeof(sh_param_t) == 8) {
+        struct {
+            sh_param_t field1;
+        } arg;
+        semihost(SH_ELAPSED, ( uintptr_t )&arg);
+        return ( uint64_t )arg.field1;
+    } else {
+        struct {
+            sh_param_t field1;
+            sh_param_t field2;
+        } arg;
+        semihost(SH_ELAPSED, ( uintptr_t )&arg);
+        return ((( uint64_t )arg.field2) << 32) | (( uint32_t )arg.field1);
     }
-    return ret;
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

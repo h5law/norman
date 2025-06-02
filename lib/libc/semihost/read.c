@@ -19,22 +19,19 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
 #include <sys/types.h>
-// #include <sys/stat.h>
-// #include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#include <stdio.h>
 
 ssize_t read(int fd, char *buf, size_t count)
 {
     if (fd == 0) {
-        int ch         = sys_semihost_getc(( FILE * )0);
+        int ch         = semihost_getc(( FILE * )0);
         *( char * )buf = ch;
         return 1;
     }
-    fd            = _map_stdio(fd);
-    uintptr_t ret = sys_semihost_read(fd, buf, count);
+    fd            = semihost_map_stdio(fd);
+    uintptr_t ret = semihost_read(fd, buf, count);
 
     ssize_t got   = count - ( ssize_t )ret;
     return got;

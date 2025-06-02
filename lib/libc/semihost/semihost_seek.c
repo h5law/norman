@@ -20,9 +20,9 @@
 
 #include <semihost/shdefs.h>
 
-uintptr_t sys_semihost_read(int fd, void *buf, size_t count)
+int semihost_seek(int fd, uintptr_t pos)
 {
-    return sys_semihost3(SYS_READ, fd, ( sh_param_t )( uintptr_t )buf, count);
+    return ( int )semihost2(SH_SEEK, fd, pos);
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

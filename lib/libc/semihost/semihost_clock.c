@@ -19,21 +19,8 @@
  */
 
 #include <semihost/shdefs.h>
-#include <stdint.h>
+#include <semihost/calls.h>
 
-void sys_semihost_heapinfo(struct sys_semihost_block *block)
-{
-    struct {
-        sh_param_t field1;
-        sh_param_t field2;
-        sh_param_t field3;
-        sh_param_t field4;
-    } arg = {0};
-    ( void )sys_semihost(SYS_HEAPINFO, ( uintptr_t )&arg);
-    block->heap_base   = ( void * )( uintptr_t )arg.field1;
-    block->heap_limit  = ( void * )( uintptr_t )arg.field2;
-    block->stack_base  = ( void * )( uintptr_t )arg.field3;
-    block->stack_limit = ( void * )( uintptr_t )arg.field4;
-}
+uintptr_t semihost_clock(void) { return semihost(SH_CLOCK, 0); }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

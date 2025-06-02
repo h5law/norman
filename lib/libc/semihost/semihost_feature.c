@@ -41,16 +41,16 @@ static void get_features(void)
         return;
     got_feature_bytes = 1;
 
-    int fd            = sys_semihost_open(":semihosting-features", 0);
+    int fd            = semihost_open(":semihosting-features", 0);
     if (fd == -1)
         return;
 
-    int len = sys_semihost_flen(fd);
+    int len = semihost_flen(fd);
     if (len < ( int )sizeof(fb_magic))
         goto do_close;
 
     uint8_t magic[sizeof(fb_magic)];
-    if (sys_semihost_read(fd, magic, sizeof(fb_magic)) != 0)
+    if (semihost_read(fd, magic, sizeof(fb_magic)) != 0)
         goto do_close;
     if (memcmp(magic, fb_magic, sizeof(fb_magic)) != 0)
         goto do_close;
@@ -59,12 +59,12 @@ static void get_features(void)
     if (to_read > ( int )sizeof(feature_bytes))
         to_read = sizeof(feature_bytes);
 
-    ( void )sys_semihost_read(fd, feature_bytes, to_read);
+    ( void )semihost_read(fd, feature_bytes, to_read);
 do_close:
-    sys_semihost_close(fd);
+    semihost_close(fd);
 }
 
-int sys_semihost_feature(uint8_t feature)
+int semihost_feature(uint8_t feature)
 {
     get_features();
     uint8_t byte = (feature >> 3);

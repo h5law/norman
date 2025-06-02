@@ -19,8 +19,11 @@
  */
 
 #include <semihost/shdefs.h>
-#include <stdint.h>
+#include <sys/types.h>
 
-int sys_semihost_close(int fd) { return ( int )sys_semihost1(SYS_CLOSE, fd); }
+uintptr_t semihost_write(int fd, const void *buf, size_t count)
+{
+    return semihost3(SH_WRITE, fd, ( sh_param_t )( uintptr_t )buf, count);
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

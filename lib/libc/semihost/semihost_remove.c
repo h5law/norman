@@ -19,10 +19,12 @@
  */
 
 #include <semihost/shdefs.h>
+#include <string.h>
 
-int sys_semihost_seek(int fd, uintptr_t pos)
+int semihost_remove(const char *pathname)
 {
-    return ( int )sys_semihost2(SYS_SEEK, fd, pos);
+    return ( int )semihost2(SH_REMOVE, ( sh_param_t )( uintptr_t )pathname,
+                            strlen(pathname));
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

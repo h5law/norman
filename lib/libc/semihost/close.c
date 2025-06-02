@@ -19,6 +19,7 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -26,7 +27,7 @@ int close(int fd)
 {
     if (fd <= 2)
         return 0;
-    return ( int )sys_semihost_close(fd);
+    return ( int )semihost_close(fd);
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

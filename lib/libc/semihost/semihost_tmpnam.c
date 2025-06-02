@@ -20,9 +20,10 @@
 
 #include <semihost/shdefs.h>
 
-void sys_semihost_write0(const char *string)
+int semihost_tmpnam(char *pathname, int identifier, int maxpath)
 {
-    ( void )sys_semihost(SYS_WRITE0, ( uintptr_t )string);
+    return ( int )semihost3(SH_TMPNAM, ( sh_param_t )( uintptr_t )pathname,
+                            identifier, maxpath);
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

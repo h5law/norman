@@ -19,21 +19,11 @@
  */
 
 #include <semihost/shdefs.h>
-#include <string.h>
+#include <sys/types.h>
 
-int sys_semihost_rename(const char *old_pathname, const char *new_pathname)
+uintptr_t semihost_read(int fd, void *buf, size_t count)
 {
-    struct {
-        sh_param_t field1;
-        sh_param_t field2;
-        sh_param_t field3;
-        sh_param_t field4;
-    } arg = {.field1 = ( sh_param_t )( uintptr_t )old_pathname,
-             .field2 = strlen(old_pathname),
-             .field3 = ( sh_param_t )( uintptr_t )new_pathname,
-             .field4 = strlen(new_pathname)};
-
-    return ( int )sys_semihost(SYS_RENAME, ( uintptr_t )&arg);
+    return semihost3(SH_READ, fd, ( sh_param_t )( uintptr_t )buf, count);
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

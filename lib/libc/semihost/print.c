@@ -19,7 +19,19 @@
  */
 
 #include <semihost/shdefs.h>
+#include <semihost/calls.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
 
-uintptr_t sys_semihost_tickfreq(void) { return sys_semihost(SYS_TICKFREQ, 0); }
+int print(const char *buf)
+{
+    int fd          = STDOUT_FILENO;
+    fd              = semihost_map_stdio(fd);
+    ssize_t   count = strlen(buf);
+    uintptr_t ret   = semihost_write(fd, buf, count);
+    ssize_t   put   = ( ssize_t )(count - ret);
+    return put;
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

@@ -19,12 +19,22 @@
  */
 
 #include <semihost/shdefs.h>
-#include <string.h>
+#include <semihost/calls.h>
+#include <stdint.h>
 
-int sys_semihost_open(const char *pathname, int semiflags)
+void semihost_heapinfo(struct semihost_mem_t *block)
 {
-    return ( int )sys_semihost3(SYS_OPEN, ( sh_param_t )( uintptr_t )pathname,
-                                semiflags, strlen(pathname));
+    struct {
+        sh_param_t field1;
+        sh_param_t field2;
+        sh_param_t field3;
+        sh_param_t field4;
+    } arg = {0};
+    ( void )semihost(SH_HEAPINFO, ( uintptr_t )&arg);
+    block->heap_base   = ( void * )( uintptr_t )arg.field1;
+    block->heap_limit  = ( void * )( uintptr_t )arg.field2;
+    block->stack_base  = ( void * )( uintptr_t )arg.field3;
+    block->stack_limit = ( void * )( uintptr_t )arg.field4;
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

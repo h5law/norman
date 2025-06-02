@@ -18,8 +18,15 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#include <stdint.h>
+#include <stdio.h>
 #include <semihost/shdefs.h>
 
-int sys_semihost_istty(int fd) { return ( int )sys_semihost1(SYS_ISTTY, fd); }
+int semihost_putc(char c, FILE *file)
+{
+    ( void )file;
+    semihost(SH_WRITEC, ( uintptr_t )&c);
+    return ( unsigned char )c;
+}
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell
