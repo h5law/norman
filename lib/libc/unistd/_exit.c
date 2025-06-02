@@ -17,40 +17,16 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-    .syntax unified
 
-    .section .syscall,"ax"
-    .align 4
-    .p2align 4,,15
-    .globl syscall
-    .type syscall,%function
-#ifdef __thumb__
-      .thumb
-#endif
-syscall:
-    /* Move syscall number into r0 from r8 */
-    mov     r0, r8
-    /* Shift syscall arguments down one register from r1... to r0... */
-    mov     r0, r1
-    mov     r1, r2
-    mov     r2, r3
-    mov     r3, r4
-    mov     r4, r5
-    mov     r5, r6
-    svc     #0
+#include <sys/syscall.h>
+#include <sys/cdefs.h>
+#include <unistd.h>
 
-    /* Check if r0 is negative (r0 + 4096 < 0) */
-    cmn     r0, #4096
-    bhi     __set_errno_internal
-    rsb     r0, r0, #0
-    bx      lr
+__noreturn void _exit(int code)
+{
+    syscall(SYS_EXIT, code);
+    for (;;)
+        ;
+}
 
-    .section .set_errno,"ax"
-    .align 2
-    .type __set_errno_internal,%function
-__set_errno_internal:
-    /* Set errno and return -1 */
-    bl set_errno
-    bx lr
-
-// vim: ft=asm ts=4 sts=4 sw=4 et ai cin
+// vim: ft=c ts=4 sts=4 sw=4 et ai cin

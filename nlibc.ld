@@ -1,4 +1,4 @@
-/* nlibc.ld: linker script for norman libc for the RP2350
+/* nlibc.pico2w.ld: linker script for norman libc for the RP2350
  * Copyright(c) 2025 h5law <dev@h5law.com>
  *
  * This software is provided 'as-is', without any express or implied
@@ -29,10 +29,10 @@ __SCRATCH_Y_BASE = 0x20081000;
 __SCRATCH_SIZE = 4K;
 
 /* heap just after bss section */
-__HEAP_SIZE  = 4K;
+__DEFAULT_HEAP_SIZE  = 4K;
 
 /* stack at the end of memory, growing down */
-__STACK_SIZE = 16K;
+__DEFAULT_STACK_SIZE = 16K;
 
 /* Entry point defaults to start of .text section(__FLASH_BASE)
  * Defines the following symbols for use by code:
@@ -61,7 +61,7 @@ ENTRY(_start)
 MEMORY
 {
   FLASH(rx)  : ORIGIN = __FLASH_BASE, LENGTH = __FLASH_SIZE
-  RAM(rwx) : ORIGIN = __RAM_BASE,   LENGTH = __RAM_SIZE
+  RAM(rwx)   : ORIGIN = __RAM_BASE,   LENGTH = __RAM_SIZE
 }
 
 PHDRS
@@ -206,7 +206,6 @@ SECTIONS
   PROVIDE(__tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)));
   PROVIDE(__tls_size_align =(__tls_size + __tls_align - 1) & ~(__tls_align - 1));
   PROVIDE(__arm32_tls_tcb_offset = MAX(8, __tls_align));
-  PROVIDE(__arm64_tls_tcb_offset = MAX(16, __tls_align));
 
   .tbss_space(NOLOAD) :
   {
@@ -237,7 +236,7 @@ SECTIONS
 
   .heap(NOLOAD) :
   {
-    . +=(DEFINED(__heap_size) ? __heap_size : __HEAP_SIZE);
+    . +=(DEFINED(__HEAP_SIZE) ? __HEAP_SIZE : __DEFAULT_HEAP_SIZE);
   } >RAM :ram
   PROVIDE(__HeapLimit = ORIGIN(RAM) + LENGTH(RAM));
   PROVIDE(__heap_start = ADDR(.heap));
@@ -246,7 +245,7 @@ SECTIONS
 
   .stack(NOLOAD) :
   {
-	. +=(DEFINED(__stack_size) ? __stack_size : __STACK_SIZE);
+	. +=(DEFINED(__STACK_SIZE) ? __STACK_SIZE : __DEFAULT_STACK_SIZE);
   } >RAM :ram
   PROVIDE(__StackLimit = ORIGIN(RAM) + LENGTH(RAM));
   PROVIDE(__max_heap = __StackLimit);
@@ -263,7 +262,6 @@ SECTIONS
   /* Discard debugging and exception sections */
   /DISCARD/ :
   {
-    *(.note .note.*)
     *(.eh_frame .eh_frame.*)
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     *(.ARM.exidx*)
@@ -324,7 +322,7 @@ SECTIONS
   .debug_str_offsets 0 : { *(.debug_str_offsets) }
   .debug_sup      0 : { *(.debug_sup) }
   .gnu.attributes 0 : { KEEP(*(.gnu.attributes)) }
-}
+};
 
 ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed");
 ASSERT(__data_size == __data_source_size,

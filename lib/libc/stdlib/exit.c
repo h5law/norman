@@ -19,8 +19,10 @@ freely, subject to the following restrictions:
  */
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/syscall.h>
+#include <sys/cdefs.h>
 
-void exit(int status) { syscall(SYS_EXIT, status); }
+__noreturn void exit(int status) { _exit(status); }
 
 // vim: ft=c ts=4 sts=4 sw=4 cin et nospell

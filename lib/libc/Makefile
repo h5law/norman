@@ -2,7 +2,7 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
 ARCH=arm
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb
+CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -g
 AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mthumb
 AR=/usr/local/bin/arm-none-eabi-ar
 LD=/usr/local/bin/arm-none-eabi-ld
@@ -18,7 +18,7 @@ SOURCES = $(foreach dir,$(HEADERS),$(wildcard $(dir)/*.c))
 ASM_SOURCES = $(foreach dir,$(ASM),$(wildcard $(dir)/*.S))
 OBJECTS = $(ASM_SOURCES:.S=.o) $(SOURCES:.c=.o)
 
-.PHONY: check clean build
+.PHONY: check clean clean_src build
 
 check:
 	mkdir -pv ${NORM_PATH}/lib/libc

@@ -13,7 +13,7 @@
 -I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin
 
 *link:
--nostdlib -T%:getenv(NORM_PATH /nlibc.ld) -L%:getenv(NORM_PATH /lib) -lnlibc --build-id=none --no-warn-rwx-segments
+-nostdlib -T%:getenv(NORM_PATH /nlibc.ld) -L%:getenv(NORM_PATH /lib) -lnlibc --build-id --no-warn-rwx-segments
 
 *lib:
 --start-group -lnlibc --end-group

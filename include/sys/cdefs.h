@@ -84,6 +84,12 @@ freely, subject to the following restrictions:
 #define __naked
 #endif
 
+#if __has_attribute(__noinline__)
+#define __noinline __attribute__((__noinline__))
+#else
+#define __noinline
+#endif
+
 #if defined(__cplusplus)
 #define __BEGIN_DECLS extern "C" {
 #define __END_DECLS   }
