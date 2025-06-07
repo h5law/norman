@@ -1,7 +1,7 @@
 [default_config]
 version = "0.10.0"
-assembler = "gas"
-instruction_set = "arm"
+assembler = "go"
+instruction_set = "aarch64"
 
 [default_config.opts]
 compiler = "/usr/local/bin/arm-none-eabi-gcc"
@@ -9,14 +9,13 @@ compile_flags_txt = [
     "cc",
     "-x",
     "assembler-with-cpp",
-    "-mcpu=cortex-m33",
-    "-mthumb",
-    "-nostartfiles",
     "-nostdinc",
-    "-fno-builtin",
     "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
     "-target",
-    "arm-none-eabi",
+    "aarch64-none-elf",
     "-std=c99",
 ]
 diagnostics = true
@@ -26,7 +25,7 @@ default_diagnostics = false
 version = "0.10.0"
 path = "lib/crt/arm"
 assembler = "gas"
-instruction_set = "arm"
+instruction_set = "thumb"
 
 [project.opts]
 compiler = "/usr/local/bin/arm-none-eabi-gcc"
@@ -36,10 +35,11 @@ compile_flags_txt = [
     "assembler-with-cpp",
     "-mcpu=cortex-m33",
     "-mthumb",
-    "-nostartfiles",
     "-nostdinc",
-    "-fno-builtin",
     "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
     "-target",
     "arm-none-eabi",
     "-std=c99",
@@ -51,7 +51,7 @@ default_diagnostics = false
 version = "0.10.0"
 path = "lib/libc/sys/arm"
 assembler = "gas"
-instruction_set = "arm"
+instruction_set = "thumb"
 
 [project.opts]
 compiler = "/usr/local/bin/arm-none-eabi-gcc"
@@ -61,10 +61,11 @@ compile_flags_txt = [
     "assembler-with-cpp",
     "-mcpu=cortex-m33",
     "-mthumb",
-    "-nostartfiles",
     "-nostdinc",
-    "-fno-builtin",
     "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
     "-target",
     "arm-none-eabi",
     "-std=c99",
@@ -74,9 +75,33 @@ default_diagnostics = false
 
 [[project]]
 version = "0.10.0"
+path = "lib/libc/sys/aarch64"
+assembler = "gas"
+instruction_set = "arm64"
+
+[project.opts]
+compiler = "/usr/local/bin/aarch64-none-elf-gcc"
+compile_flags_txt = [
+    "cc",
+    "-x",
+    "assembler-with-cpp",
+    "-nostdinc",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
+    "-target",
+    "aarch64-none-elf",
+    "-std=c99",
+]
+diagnostics = true
+default_diagnostics = false
+
+[[project]]
+version = "0.10.0"
 path = "lib/libc/semihost/arm"
 assembler = "gas"
-instruction_set = "arm"
+instruction_set = "thumb"
 
 [project.opts]
 compiler = "/usr/local/bin/arm-none-eabi-gcc"
@@ -86,12 +111,37 @@ compile_flags_txt = [
     "assembler-with-cpp",
     "-mcpu=cortex-m33",
     "-mthumb",
-    "-nostartfiles",
     "-nostdinc",
-    "-fno-builtin",
     "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
     "-target",
     "arm-none-eabi",
+    "-std=c99",
+]
+diagnostics = true
+default_diagnostics = false
+
+[[project]]
+version = "0.10.0"
+path = "lib/libc/semihost/aarch64"
+assembler = "gas"
+instruction_set = "arm64"
+
+[project.opts]
+compiler = "/usr/local/bin/aarch64-none-elf-gcc"
+compile_flags_txt = [
+    "cc",
+    "-x",
+    "assembler-with-cpp",
+    "-nostdinc",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
+    "-target",
+    "aarch64-none-elf",
     "-std=c99",
 ]
 diagnostics = true

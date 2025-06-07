@@ -15,6 +15,7 @@ external dependencies in plain C99.
 
 ## TODO
 
+- Replace usage of `newlib` `libc`'s [`crt0.o`](./external/)
 - Implement basics of `malloc` family of functions
 - Implement memory operations from `string.h`
   - `memset`, `mem(n)cpy`, `memmove`, ...
