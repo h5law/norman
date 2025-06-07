@@ -17,27 +17,13 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-    .syntax unified
-
     .text
-    .align 4
-    .p2align 4,,15
+    .palign 0
     .globl semihost
     .type semihost,%function
-#ifdef __thumb__
-    .thumb
-#endif
 semihost:
-#if __ARM_ARCH_PROFILE == 'M'
-	bkpt    #0xab
-#else
-#ifdef __thumb__
-	svc     #0xab
-#else
-	svc     #0x123456
-#endif
-#endif
-	bx      lr
+    hlt     #0xf000
+    ret
     .size semihost, . - semihost
 
 // vim: ft=asm ts=4 sts=4 sw=4 et ai cin
