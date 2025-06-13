@@ -21,6 +21,14 @@ freely, subject to the following restrictions:
 #ifndef NORM_SYS_CDEFS_H
 #define NORM_SYS_CDEFS_H
 
+#ifndef _u
+#ifdef __ASSEMBLER__
+#define _u(x) x
+#else
+#define _u(x) x##u
+#endif
+#endif
+
 #ifndef __has_attribute
 #define __has_attribute(x) 0
 #endif
@@ -89,6 +97,11 @@ freely, subject to the following restrictions:
 #else
 #define __noinline
 #endif
+
+#define __CONCAT1(x, y) x##y
+#define __CONCAT(x, y)  __CONCAT1(x, y)
+#define __STRING(x)     #x          /* stringify without expanding x */
+#define __XSTRING(x)    __STRING(x) /* expand x, then stringify */
 
 #if defined(__cplusplus)
 #define __BEGIN_DECLS extern "C" {

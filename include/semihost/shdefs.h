@@ -64,7 +64,6 @@ typedef uintptr_t sh_param_t;
 
 extern uintptr_t semihost(uintptr_t op, uintptr_t param);
 
-/* Helper functions to simplify semihosting calls with indirect arguments. */
 static inline uintptr_t
 semihost1(long op, sh_param_t arg1)
 {
@@ -104,8 +103,7 @@ semihost3(long op, sh_param_t arg1, sh_param_t arg2, sh_param_t arg3)
     return semihost(op, (uintptr_t)&indirect_args);
 }
 
-int
-semihost_map_stdio(int fd);
+int semihost_map_stdio(int fd);
 
 #endif /* ifndef NORM_SHDEFS_H */
 
