@@ -23,8 +23,8 @@
 #include <sys/cdefs.h>
 #include <semihost/calls.h>
 
-void __naked __used __disable_sanitizer _start(void); /* csu entry point */
-int main(int, char **); /* application entry point */
+void _start(void);       /* csu entry point */
+int  main(int, char **); /* application entry point */
 
 extern FILE *stdin, *stdout, *stderr;
 

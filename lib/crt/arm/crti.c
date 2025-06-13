@@ -38,12 +38,10 @@ void _fini(void)
         (*func)();
 }
 
-crt_fn _init_array_start[0]
-        __attribute__((used, section(".init_array,\"aw\",%init_array"),
-                       aligned(sizeof(crt_fn)))) = {};
-crt_fn _fini_array_start[0]
-        __attribute__((used, section(".fini_array,\"aw\",%fini_array"),
-                       aligned(sizeof(crt_fn)))) = {};
+crt_fn _init_array_start[0] __attribute__((used, section(".init_array"),
+                                           aligned(sizeof(crt_fn)))) = {};
+crt_fn _fini_array_start[0] __attribute__((used, section(".fini_array"),
+                                           aligned(sizeof(crt_fn)))) = {};
 
 #endif /* ifndef NORM_CRT_I_H */
 

@@ -3,12 +3,13 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 SRC_DIR=arm
 BUILD_DIR=build
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -g
-AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mthumb
+CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
+AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
 AR=/usr/local/bin/arm-none-eabi-ar
-LD=/usr/local/bin/arm-none-eabi-ld --gc-sections --entry "_start"
+LD=/usr/local/bin/arm-none-eabi-ld
 
-CFLAGS=-O3 -nostdinc -I${NORM_PATH}/include -I${NORM_PATH}/lib/crt -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -specs=${NORM_PATH}/nlibc.specs
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
+CFLAGS+= -I${NORM_PATH}/lib/crt -I${NORM_PATH}/pico-sdk/src/rp2_common/cmsis/stub/CMSIS/Core/Include -I${NORM_PATH}/pico-sdk/src/rp2_common/cmsis/stub/CMSIS/Device/RP2350/Include -I/usr/local/lib/gcc/arm-none-eabi/14.2.1/include
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 CRTI=$(SRC_DIR)/crti.c
@@ -17,25 +18,30 @@ CRTN=$(SRC_DIR)/crtn.c
 CRTI_OBJ=$(BUILD_DIR)/crti.o
 CRTN_OBJ=$(BUILD_DIR)/crtn.o
 
-# OBJ_LINK_LIST:=$(BUILD_DIR)/crt0.o $(CRTI_OBJ) $(CRTN_OBJ)
+OBJ_LINK_LIST:=$(BUILD_DIR)/crt0.o $(CRTI_OBJ) $(CRTN_OBJ) $(BUILD_DIR)/block.o
 
 .PHONY: check clean build
 
 check: $(SRC_DIR)
 	mkdir -pv $(BUILD_DIR)
 	mkdir -pv $(SRC_DIR)
+	mkdir -pv ${NORM_PATH}/pico-sdk
 
-$(BUILD_DIR)/crt0.o: $(SRC_DIR)/crt0.c # $(SRC_DIR)/crt0.S
-	# $(AS) -c $(SRC_DIR)/crt0.S -o $(BUILD_DIR)/crt0_s.o
-	$(CC) $(CFLAGS) -DCRT0_SEMIHOST $(LDFLAGS) -o $(BUILD_DIR)/crt0.o -c $(SRC_DIR)/crt0.c
-#
-# $(BUILD_DIR)/crti.o: $(CRTI)
-# 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(CRTI_OBJ) -c $(CRTI)
-#
-# $(BUILD_DIR)/crtn.o: $(CRTN)
-# 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(CRTN_OBJ) -c $(CRTN)
+$(BUILD_DIR)/crt0.o: $(SRC_DIR)/crt0.c $(SRC_DIR)/crt0.S
+	$(CC) -I$(SRC_DIR) $(CFLAGS) -o $(BUILD_DIR)/crt0_s.o -c $(SRC_DIR)/crt0.S
+	$(CC) -I$(SRC_DIR) $(CFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/crt0_c.o -c $(SRC_DIR)/crt0.c
+	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/crt0.o -r $(BUILD_DIR)/crt0_s.o $(BUILD_DIR)/crt0_c.o
 
-build: check $(BUILD_DIR)/crt0.o #$(OBJ_LINK_LIST)
+$(BUILD_DIR)/crti.o: $(CRTI)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(CRTI_OBJ) -c $(CRTI)
+
+$(BUILD_DIR)/crtn.o: $(CRTN)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(CRTN_OBJ) -c $(CRTN)
+
+$(BUILD_DIR)/block.o: $(SRC_DIR)/block.S
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/block.o -c $(SRC_DIR)/block.S
+
+build: check $(OBJ_LINK_LIST)
 
 clean:
 	rm -vfrd $(BUILD_DIR)/

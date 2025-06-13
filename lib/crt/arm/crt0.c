@@ -1,65 +1,107 @@
+/*
+ * Copyright (c) 2025 h5law <dev@h5law.com>
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgement in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ */
 
 #include <sys/cdefs.h>
 
+#include "RP2350.h"
+#include "core_cm33.h"
 #include "../crt0.h"
 
-/* Cortex-mM includes an NVIC and starts with SP initialized */
+// defined in CMSIS as __StackTop
+extern uint32_t __INITIAL_SP;
 
-extern const void *__interrupt_vector[];
+extern __NO_RETURN void _start(void);
 
-#define CPACR (( volatile uint32_t * )(0xE000ED88))
+void        Default_Handler(void);
+__NO_RETURN __section(".reset") void Reset_Handler(void);
+void        NMI_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void        HardFault_Handler(void) __attribute__((weak));
+void MemManage_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void BusFault_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void UsageFault_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void SecureFault_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void SVC_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void DebugMon_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void PendSV_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void SysTick_Handler(void) __attribute__((weak, alias("Default_Handler")));
 
-#ifdef __clang__
-const void *__interrupt_reference = __interrupt_vector;
-#endif
+// defined in system_RP2350.h
+typedef void (*VECTOR_TABLE_Type)(void);
+// __VECTOR_TABLE is __Vectors (m-profile/cmsis_gcc.h)
+extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
+// attribute is defined as (used, section(".vectors"))
+const VECTOR_TABLE_Type        __VECTOR_TABLE[496] __VECTOR_TABLE_ATTRIBUTE = {
+        ( VECTOR_TABLE_Type )(&__INITIAL_SP),
+        Reset_Handler,
+        NMI_Handler,
+        HardFault_Handler,
+        MemManage_Handler,
+        BusFault_Handler,
+        UsageFault_Handler,
+        SecureFault_Handler,
+        0,
+        0,
+        0,
+        SVC_Handler,
+        DebugMon_Handler,
+        0,
+        PendSV_Handler,
+        SysTick_Handler};
 
-void __disable_sanitizer _start(void)
+void Default_Handler(void)
 {
-    /* Generate a reference to __interrupt_vector so we get one loaded */
-    __asm__(".equ __my_interrupt_vector, __interrupt_vector");
-    /* Access to the coprocessor has to be enabled in CPACR, if either FPU or
-     * MVE is used. This is described in "Arm v8-M Architecture Reference
-     * Manual". */
-#if defined __ARM_FP || defined __ARM_FEATURE_MVE
-    /* Enable FPU */
-    *CPACR |= 0xf << 20;
-    /*
-     * Wait for the write enabling FPU to reach memory before
-     * executing the instruction accessing the status register
-     */
-    __asm__("dsb");
-    __asm__("isb");
+    while (1)
+        ;
+}
 
-    /* Clear FPU status register. 0x40000 will initialize FPSCR.LTPSIZE to
-     * a valid value for 8.1-m low overhead loops. */
-#if __ARM_ARCH >= 8 && __ARM_ARCH_PROFILE == 'M'
-#define INIT_FPSCR 0x40000
-#else
-#define INIT_FPSCR 0x0
-#endif
-    __asm__("vmsr fpscr, %0" : : "r"(INIT_FPSCR));
-#endif
+__NO_RETURN void Reset_Handler(void)
+{
+    // defined in CMSIS as __StackLimit
+    extern uint32_t __STACK_LIMIT;
 
-#if defined(__ARM_FEATURE_PAC_DEFAULT) || defined(__ARM_FEATURE_BTI_DEFAULT)
-    uint32_t control;
-    __asm__("mrs %0, CONTROL" : "=r"(control));
-#ifdef __ARM_FEATURE_PAC_DEFAULT
-    control |= (3 << 6);
-#endif
-#ifdef __ARM_FEATURE_BTI_DEFAULT
-    control |= (3 << 4);
-#endif
-    __asm__("msr CONTROL, %0" : : "r"(control));
-#endif
-    __start();
+    __set_PSP(( uint32_t )(&__INITIAL_SP));
+    __set_MSPLIM(( uint32_t )(&__STACK_LIMIT));
+    __set_PSPLIM(( uint32_t )(&__STACK_LIMIT));
+
+    // copy data section from FLASH to RAM
+    extern uint32_t *__data_start__;
+    extern uint32_t *__data_end__;
+    extern uint32_t *__data_source__;
+
+    uint32_t *p = __data_start__;
+    uint32_t *q = __data_source__;
+
+    while (p < __data_end__) {
+        *p++ = *q++;
+    }
+
+    _start();
+}
+
+void HardFault_Handler(void)
+{
+    while (1)
+        ;
 }
 
 #ifdef CRT0_SEMIHOST
-
-/*
- * Trap faults, print message and exit when running under semihost
- */
-
 #include <semihost/calls.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -149,3 +191,5 @@ void __naked __disable_sanitizer arm_usagefault_isr(void)
 }
 
 #endif /* CRT0_SEMIHOST */
+
+// vim: ft=c ts=4 sts=4 sw=4 et ai cin
