@@ -20,37 +20,38 @@
     .syntax unified
 
     .text
-    .align 4
-    .palign 4,,15
+    .palign 0
     .globl syscall
     .type syscall,%function
-#ifdef __thumb__
-    .thumb
-#endif
 syscall:
-    /* Move syscall number into r0 from r7 */
-    mov     r7, r0
-    /* Shift syscall arguments down one register from r1... to r6... */
-    mov     r0, r1
-    mov     r1, r2
-    mov     r2, r3
-    svc     #0
+    /* Move syscall number into x0 from x8 */
+    mov     x8, x0
+    /* Shift syscall arguments down one register from x1... to x7... */
+    mov     x0, x1
+    mov     x1, x2
+    mov     x2, x3
+    mov     x3, x4
+    mov     x4, x5
+    mov     x5, x6
+    swi     #0
 
-    /* Check if r0 is negative (r0 < 0) */
-    cmn     r0, #4096
-    blt     .Lcall_set_errno
-    bx      lr
+    /* Check if x0 is negative (x0 < 0) */
+    cmn     x0, #(4095 + 1)
+    cneg    x0, x0, hi
+    b.hi    .Lcall_set_errno
+
+    ret
 
 .Lcall_set_errno:
-    /* Preserve r0 (the error code) by moving it to r1 */
-    mov     r1, r0
+    /* Preserve x0 (the error code) by moving it to x1 */
+    mov     x1, x0
     /* Load the address of set_errno into a register */
-    ldr     r12, =set_errno
-    /* Call set_errno(r1) via the register */
-    blx     r12
+    ldr     x12, =set_errno
+    /* Call set_errno(x1) via the register */
+    blx     x12
     /* Set return value to 1 */
-    mov     r0, #1
-    bx      lr
+    mov     x0, #1
+    ret
     .size syscall, . - syscall
 
 // vim: ft=asm ts=4 sts=4 sw=4 et ai cin
