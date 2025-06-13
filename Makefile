@@ -5,7 +5,14 @@ BUILD_DIR=build
 TEST_DIR=tests
 INCLUDE_DIR=include
 
-ARCH=arm
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),arm64)
+	ARCH = aarch64
+else ifeq ($(ARCH),x86_64)
+	ARCH = amd64
+else
+	$(error "Unsupported architecture: $(ARCH)")
+endif
 
 CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
 AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g

@@ -1,5 +1,14 @@
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),arm64)
+	ARCH = aarch64
+else ifeq ($(ARCH),x86_64)
+	ARCH = amd64
+else
+	$(error "Unsupported architecture: $(ARCH)")
+endif
+
 SRC_DIR=arm
 BUILD_DIR=build
 
