@@ -17,15 +17,60 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
  */
+/* simple syscall (syscall-arm64.S + system.h) test program
+ * СИГМА - БАСЕД ДЕВ
+ */
 
-#include <semihost/calls.h>
 #include <stdio.h>
 #include <sys/types.h>
 
 int main(int argc, char *argv[])
 {
-    print("Starting main loop...\n");
-    semihost_exit_extended(5);
+    if (argc < 2 || argc > 2) {
+        print("Usage: %s <filename>\n");
+        return 1;
+    }
+
+    // Open the file using our syscall function
+    print("Opening file...\n");
+    int fd = open(argv[1], O_RDONLY, 0);
+    if (fd < 0) {
+        print("Error opening file\n");
+        return 1;
+    }
+
+    print("Successfully opened file\n");
+
+    // Create a buffer for reading
+    char    buffer[4096];
+    ssize_t bytes_read;
+    ssize_t total_bytes = 0;
+
+    // Read and display the file contents
+    print("\n--- File Contents ---\n");
+
+    while ((bytes_read = read(fd, buffer, sizeof(buffer) - 1)) > 0) {
+        // Null-terminate the buffer
+        buffer[bytes_read] = '\0';
+
+        // Write to stdout
+        write(STDOUT_FILENO, buffer, bytes_read);
+
+        total_bytes += bytes_read;
+    }
+
+    print("\n--- End of File ---\n");
+
+    if (bytes_read < 0) {
+        print("Error reading file\n");
+    }
+
+    // Close the file
+    if (close(fd) < 0) {
+        print("Error closing file\n");
+    }
+
+    return 0;
 }
 
 // vim: ft=c ts=4 sts=4 sw=4 et ai cin
