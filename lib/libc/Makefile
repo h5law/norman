@@ -2,21 +2,21 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
 ARCH=arm
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -g
-AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mthumb
+CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
+AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
 AR=/usr/local/bin/arm-none-eabi-ar
 LD=/usr/local/bin/arm-none-eabi-ld
 
-CFLAGS=-O3 -nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -specs=${NORM_PATH}/nlibc.specs
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 LIBRARY=${NORM_PATH}/lib/libnlibc.a
-HEADERS=stdio stdlib string sys semihost
+HEADERS=stdio stdlib string sys semihost unistd
 ASM=${NORM_PATH}/lib/libc/sys/$(ARCH) ${NORM_PATH}/lib/libc/semihost/$(ARCH)
 
 SOURCES = $(foreach dir,$(HEADERS),$(wildcard $(dir)/*.c))
 ASM_SOURCES = $(foreach dir,$(ASM),$(wildcard $(dir)/*.S))
-OBJECTS = $(ASM_SOURCES:.S=.o) $(SOURCES:.c=.o)
+OBJECTS = $(SOURCES:.c=.o) $(ASM_SOURCES:.S=.o)
 
 .PHONY: check clean clean_src build
 
@@ -31,9 +31,14 @@ $(LIBRARY): $(OBJECTS)
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-%.o: %.S
+${NORM_PATH}/lib/libc/sys/$(ARCH)/syscall.o: ${NORM_PATH}/lib/libc/sys/$(ARCH)/syscall.S
 	# $(AS) -c $< -o $@
 	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
+
+${NORM_PATH}/lib/libc/semihost/$(ARCH)/semihost.o: $(wildcard semihost/*.c) ${NORM_PATH}/lib/libc/semihost/$(ARCH)/semihost.S
+	# $(AS) -c $< -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) -c ${NORM_PATH}/lib/libc/semihost/$(ARCH)/semihost.S -o ${NORM_PATH}/lib/libc/semihost/$(ARCH)/semihost.o
+	$(LD) -o ${NORM_PATH}/build/semihost.o -Ur ${NORM_PATH}/lib/libc/semihost/$(ARCH)/semihost.o $(wildcard semihost/*.o)
 
 clean:
 	rm -vf $(OBJECTS) $(LIBRARY)

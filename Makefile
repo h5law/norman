@@ -7,17 +7,16 @@ INCLUDE_DIR=include
 
 ARCH=arm
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -g
-AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mthumb
+CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
+AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
 AR=/usr/local/bin/arm-none-eabi-ar
 LD=/usr/local/bin/arm-none-eabi-ld
 
-CFLAGS=-O3 -nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -specs=${NORM_PATH}/nlibc.specs
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
-CRT_PRE=$(LIB_DIR)/crt/build/crt0.o
-#$(LIB_DIR)/crt/build/crti.o
-# CRT_POST=$(LIB_DIR)/crt/build/crtn.o
+CRT_PRE=$(LIB_DIR)/crt/build/crt0.o $(LIB_DIR)/crt/build/crti.o
+CRT_POST=$(LIB_DIR)/crt/build/crtn.o
 
 .PHONY: clean build demo always
 
@@ -36,9 +35,8 @@ crt: ${NORM_PATH}/$(LIB_DIR)/crt
 $(BUILD_DIR)/demo.o: $(TEST_DIR)/demo.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/demo.o -c $(TEST_DIR)/demo.c
 
-demo: always nlibc crt $(BUILD_DIR)/demo.o $(LIB_DIR)/libc/sys/$(ARCH)/syscall.o
-	$(CC) $(CFLAGS) -DCRT0_SEMIHOST $(LFLAGS) -nostartfiles -o $(BUILD_DIR)/demo.elf -Ur $(CRT_PRE) $(BUILD_DIR)/demo.o $(LIB_DIR)/libc/sys/$(ARCH)/syscall.o
-	#\$(CRT_POST)
+demo: always nlibc crt $(BUILD_DIR)/demo.o
+	$(CC) $(CFLAGS) $(LFLAGS) -nostartfiles -o $(BUILD_DIR)/demo.elf -Ur $(CRT_PRE) $(LIB_DIR)/crt/build/block.o $(BUILD_DIR)/demo.o ${NORM_PATH}/build/semihost.o $(CRT_POST)
 
 build: clean always nlibc crt demo
 

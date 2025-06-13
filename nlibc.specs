@@ -4,22 +4,22 @@
 %rename     cc1plus nlibc_cc1plus
 
 *cpp:
--I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin
+-I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections
 
 *cc1:
--I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin
+-I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections
 
 *cc1plus:
--I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin
+-I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections
 
 *link:
--nostdlib -T%:getenv(NORM_PATH /nlibc.ld) -L%:getenv(NORM_PATH /lib) -lnlibc --build-id --no-warn-rwx-segments
+-nostdlib -T%:getenv(NORM_PATH /nlibc.ld) -L%:getenv(NORM_PATH /lib) -lnlibc --no-warn-rwx-segments
 
 *lib:
 --start-group -lnlibc --end-group
 
 *startfile:
-%:getenv(NORM_PATH /lib/crt/build/crt0.o) %:getenv(NORM_PATH /lib/crt/build/crti.o)
+%:getenv(NORM_CRT0_PATH) %:getenv(NORM_PATH /lib/crt/build/crti.o)
 
 *endfile:
 %:getenv(NORM_PATH /lib/crt/build/crtn.o)

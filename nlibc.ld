@@ -22,11 +22,7 @@ __FLASH_BASE = 0x10000000;
 __FLASH_SIZE = 4096K;
 
 __RAM_BASE = 0x20000000;
-__RAM_SIZE = 512K;
-
-__SCRATCH_X_BASE = 0x20080000;
-__SCRATCH_Y_BASE = 0x20081000;
-__SCRATCH_SIZE = 4K;
+__RAM_SIZE = 520K;
 
 /* heap just after bss section */
 __DEFAULT_HEAP_SIZE  = 4K;
@@ -36,49 +32,37 @@ __DEFAULT_STACK_SIZE = 16K;
 
 /* Entry point defaults to start of .text section(__FLASH_BASE)
  * Defines the following symbols for use by code:
- *  __exidx_start
- *  __exidx_end
- *  __etext
- *  __data_start__
- *  __preinit_array_start
- *  __preinit_array_end
- *  __init_array_start
- *  __init_array_end
- *  __fini_array_start
- *  __fini_array_end
- *  __data_end__
- *  __bss_start__
- *  __bss_end__
- *  __end__
+ *  __exidx_star__t
+ *  __exidx_en__d
+ *  __etex__t
+ *  __data_start____
+ *  __preinit_array_star__t
+ *  __preinit_array_en__d
+ *  __init_array_star__t
+ *  __init_array_en__d
+ *  __fini_array_star__t
+ *  __fini_array_en__d
+ *  __data_end____
+ *  __bss_start____
+ *  __bss_end____
+ *  __end____
  *  end
  *  __HeapLimit
  *  __StackLimit
  *  __StackTop
- *  __stack(== StackTop)
+ *  __stack(__== StackTop)
  */
-ENTRY(_start)
-
 MEMORY
 {
   FLASH(rx)  : ORIGIN = __FLASH_BASE, LENGTH = __FLASH_SIZE
   RAM(rwx)   : ORIGIN = __RAM_BASE,   LENGTH = __RAM_SIZE
 }
 
-PHDRS
-{
-  text_fvector PT_LOAD;
-  text PT_LOAD;
-  ram_init PT_LOAD;
-  ram PT_LOAD;
-  tls_init PT_TLS;
-  tls PT_TLS;
-}
-
 SECTIONS
 {
  .flash_begin :
   {
-    __flash_binary_start = .;
+    __flash_binary_start__ = .;
   } >FLASH
 
   .vectors :
@@ -88,36 +72,38 @@ SECTIONS
 
   .text :
   {
-    __logical_binary_start = .;
+    __logical_binary_start__ = .;
     KEEP(*(.vectors))
+    *(.embedded_block)
+    KEEP(*(.embedded_block))
     KEEP(*(.reset))
 
-    *(.text*)
+    *(.text .text.*)
     *(.gnu.linkonce.t.*)
     KEEP(*(.init .fini.*))
-    __text_end = .;
+    __text_end__ = .;
 
-    PROVIDE(__etext = __text_end);
-    PROVIDE(__etext = __text_end);
-    PROVIDE(_etext = __text_end);
+    PROVIDE(__etext__ = __text_end__);
+    PROVIDE(__etext__ = __text_end__);
+    PROVIDE(_etext = __text_end__);
 
     . = ALIGN(4);
-    PROVIDE(__preinit_array_start = .);
+    PROVIDE(__preinit_array_start__ = .);
     KEEP(*(SORT(.preinit_array.*)))
     KEEP(*(.preinit_array))
-    PROVIDE(__preinit_array_end = .);
+    PROVIDE(__preinit_array_end__ = .);
 
     . = ALIGN(4);
-    PROVIDE(__init_array_start = .);
+    PROVIDE(__init_array_start__ = .);
     KEEP(*(SORT(.init_array.*)))
     KEEP(*(.init_array))
-    PROVIDE(__init_array_end = .);
+    PROVIDE(__init_array_end__ = .);
 
     . = ALIGN(4);
-    PROVIDE(__fini_array_start = .);
+    PROVIDE(__fini_array_start__ = .);
     KEEP(*(SORT(.fini_array.*)))
     KEEP(*(.fini_array*))
-    PROVIDE(__fini_array_end = .);
+    PROVIDE(__fini_array_end__ = .);
   } >FLASH AT>FLASH :text
 
   .rodata :
@@ -139,8 +125,8 @@ SECTIONS
     *(.rela.iplt)
     *(.rela.*)
   } >FLASH AT>FLASH :text
-  PROVIDE(__plt_start = ADDR(.plt));
-  PROVIDE(__plt_size = SIZEOF(.plt));
+  PROVIDE(__plt_start__ = ADDR(.plt));
+  PROVIDE(__plt_size__ = SIZEOF(.plt));
 
   .got :
   {
@@ -156,56 +142,56 @@ SECTIONS
 
   .data :
   {
-    __data_start = .;
+    __data_start__ = .;
     *(.data .data.*)
     *(.gnu.linkonce.d.*)
-    PROVIDE(__global_pointer$ = . + 0x800);
+    PROVIDE(__global_pointer$__ = . + 0x800);
     PROVIDE(_gp = . + 0x8000);
     *(.sdata .sdata.* .sdata2.*)
     *(.gnu.linkonce.s.*)
-    PROVIDE(__stack_chk_start = .);
+    PROVIDE(__stack_chk_start__ = .);
     KEEP(*(.stack_chk .stack_chk.*))
-    PROVIDE(__stack_chk_end = .);
+    PROVIDE(__stack_chk_end__ = .);
   } >RAM AT>FLASH :ram_init
-  PROVIDE(__data_start = ADDR(.data));
-  PROVIDE(__data_source = LOADADDR(.data));
+  PROVIDE(__data_start__ = ADDR(.data));
+  PROVIDE(__data_source__ = LOADADDR(.data));
 
   .tdata :
   {
     *(.tdata .tdata.* .gnu.linkonce.td.*)
-    PROVIDE(__data_end = .);
-    PROVIDE(__tdata_end = .);
+    PROVIDE(__data_end__ = .);
+    PROVIDE(__tdata_end__ = .);
   } >RAM AT>FLASH :ram_init
-  PROVIDE(__tdata_start = ADDR(.tdata));
-  PROVIDE(__tdata_source = LOADADDR(.tdata));
-  PROVIDE(__tdata_source_end = LOADADDR(.tdata) + SIZEOF(.tdata));
-  PROVIDE(__data_source_end = __tdata_source_end);
-  PROVIDE(__tdata_size = SIZEOF(.tdata));
-  PROVIDE(__data_start = ADDR(.data));
-  PROVIDE(__data_source = LOADADDR(.data));
+  PROVIDE(__tdata_start__ = ADDR(.tdata));
+  PROVIDE(__tdata_source__ = LOADADDR(.tdata));
+  PROVIDE(__tdata_source_end__ = LOADADDR(.tdata) + SIZEOF(.tdata));
+  PROVIDE(__data_source_end__ = __tdata_source_end__);
+  PROVIDE(__tdata_size__ = SIZEOF(.tdata));
+  PROVIDE(__data_start__ = ADDR(.data));
+  PROVIDE(__data_source__ = LOADADDR(.data));
 
-  PROVIDE(__edata = __data_end);
-  PROVIDE(__edata = __data_end);
-  PROVIDE(_edata = __data_end);
-  PROVIDE(__data_size = __data_end - __data_start);
-  PROVIDE(__data_source_size = __data_source_end - __data_source);
+  PROVIDE(__edata__ = __data_end__);
+  PROVIDE(__edata__ = __data_end__);
+  PROVIDE(_edata = __data_end__);
+  PROVIDE(__data_size__ = __data_end__ - __data_start__);
+  PROVIDE(__data_source_size__ = __data_source_end__ - __data_source__);
 
   .tbss(NOLOAD) :
   {
     . = ALIGN(4);
     *(.tbss .tbss.* .gnu.linkonce.tb.*)
     *(.tcommon)
-    PROVIDE(__tls_end = .);
-    PROVIDE(__tbss_end = .);
+    PROVIDE(__tls_end__ = .);
+    PROVIDE(__tbss_end__ = .);
   } >RAM AT>RAM :ram
-  PROVIDE(__bss_start = ADDR(.tbss));
-  PROVIDE(__tbss_start = ADDR(.tbss));
-  PROVIDE(__tbss_offset = ADDR(.tbss) - ADDR(.tdata));
-  PROVIDE(__tbss_size = SIZEOF(.tbss));
-  PROVIDE(__tls_size = __tls_end - __tls_base );
-  PROVIDE(__tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)));
-  PROVIDE(__tls_size_align =(__tls_size + __tls_align - 1) & ~(__tls_align - 1));
-  PROVIDE(__arm32_tls_tcb_offset = MAX(8, __tls_align));
+  PROVIDE(__bss_start__ = ADDR(.tbss));
+  PROVIDE(__tbss_start__ = ADDR(.tbss));
+  PROVIDE(__tbss_offset__ = ADDR(.tbss) - ADDR(.tdata));
+  PROVIDE(__tbss_size__ = SIZEOF(.tbss));
+  PROVIDE(__tls_size__ = __tls_end__ - __tls_base__ );
+  PROVIDE(__tls_align__ = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)));
+  PROVIDE(__tls_size_align__ =(__tls_size__ + __tls_align__ - 1) & ~(__tls_align__ - 1));
+  PROVIDE(__arm32_tls_tcb_offset__ = MAX(8, __tls_align__));
 
   .tbss_space(NOLOAD) :
   {
@@ -215,33 +201,34 @@ SECTIONS
 
   .bss(NOLOAD) :
   {
-    . = ALIGN(__tls_align);
-    PROVIDE(__tls_tail_extra_start = .);
+    . = ALIGN(__tls_align__);
+    PROVIDE(__tls_tail_extra_start__ = .);
     KEEP(*(.tls_tail_extra .tls_tail_extra.*))
-    PROVIDE(__tls_tail_extra_end = .);
-    PROVIDE(__non_tls_bss_start = .);
+    PROVIDE(__tls_tail_extra_end__ = .);
+    PROVIDE(__non_tls_bss_start__ = .);
     *(.sbss*)
    *(.gnu.linkonce.sb.*)
     *(.bss .bss.*)
     *(.gnu.linkonce.b.*)
     *(COMMON)
     . = ALIGN(4);
-    __bss_end = .;
+    __bss_end__ = .;
   } >RAM AT>RAM :ram
-  PROVIDE(__non_tls_bss_start = ADDR(.bss));
-  PROVIDE(__end = __bss_end);
-  __end = __bss_end;
-  PROVIDE(_end = __bss_end);
-  PROVIDE(__bss_size = __bss_end - __bss_start);
+  PROVIDE(__non_tls_bss_start__ = ADDR(.bss));
+  PROVIDE(__end__ = __bss_end__);
+  __end__ = __bss_end__;
+  PROVIDE(_end = __bss_end__);
+  PROVIDE(end = __bss_end__);
+  PROVIDE(__bss_size__ = __bss_end__ - __bss_start__);
 
   .heap(NOLOAD) :
   {
     . +=(DEFINED(__HEAP_SIZE) ? __HEAP_SIZE : __DEFAULT_HEAP_SIZE);
   } >RAM :ram
   PROVIDE(__HeapLimit = ORIGIN(RAM) + LENGTH(RAM));
-  PROVIDE(__heap_start = ADDR(.heap));
-  PROVIDE(__heap_end = ADDR(.heap) + SIZEOF(.heap));
-  PROVIDE(__heap_size = __heap_end - __heap_start);
+  PROVIDE(__heap_start__ = ADDR(.heap));
+  PROVIDE(__heap_end__ = ADDR(.heap) + SIZEOF(.heap));
+  PROVIDE(__heap_size__ = __heap_end__ - __heap_start__);
 
   .stack(NOLOAD) :
   {
@@ -256,7 +243,7 @@ SECTIONS
 
   .flash_end :
   {
-    PROVIDE(__flash_binary_end = .);
+    PROVIDE(__flash_binary_end__ = .);
   } >FLASH AT>FLASH =0xaa
 
   /* Discard debugging and exception sections */
@@ -325,5 +312,5 @@ SECTIONS
 };
 
 ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed");
-ASSERT(__data_size == __data_source_size,
+ASSERT(__data_size__ == __data_source_size__,
   "ERROR: .data/.tdata flash size does not match RAM size");

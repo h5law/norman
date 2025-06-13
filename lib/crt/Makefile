@@ -9,7 +9,6 @@ AR=/usr/local/bin/arm-none-eabi-ar
 LD=/usr/local/bin/arm-none-eabi-ld
 
 CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
-CFLAGS+= -I${NORM_PATH}/lib/crt -I${NORM_PATH}/pico-sdk/src/rp2_common/cmsis/stub/CMSIS/Core/Include -I${NORM_PATH}/pico-sdk/src/rp2_common/cmsis/stub/CMSIS/Device/RP2350/Include -I/usr/local/lib/gcc/arm-none-eabi/14.2.1/include
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 CRTI=$(SRC_DIR)/crti.c
@@ -25,7 +24,6 @@ OBJ_LINK_LIST:=$(BUILD_DIR)/crt0.o $(CRTI_OBJ) $(CRTN_OBJ) $(BUILD_DIR)/block.o
 check: $(SRC_DIR)
 	mkdir -pv $(BUILD_DIR)
 	mkdir -pv $(SRC_DIR)
-	mkdir -pv ${NORM_PATH}/pico-sdk
 
 $(BUILD_DIR)/crt0.o: $(SRC_DIR)/crt0.c $(SRC_DIR)/crt0.S
 	$(CC) -I$(SRC_DIR) $(CFLAGS) -o $(BUILD_DIR)/crt0_s.o -c $(SRC_DIR)/crt0.S
