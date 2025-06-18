@@ -1,5 +1,6 @@
 .DS_Store
-external/*/**
+kern/uefi
+external
 build/
 .zig-cache/
 zig-out/
