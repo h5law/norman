@@ -17,13 +17,39 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-    .text
-    .align 0
-    .globl semihost
-    .type semihost,%function
-semihost:
-    hlt     #0xf000
-    ret
-    .size semihost, . - semihost
 
-// vim: ft=asm ts=4 sts=4 sw=4 et ai cin
+ENTRY(_start)
+
+PHDRS
+{
+    text PT_LOAD FLAGS(5);   /* Read + Execute (RX) */
+    rodata PT_LOAD FLAGS(4); /* Read-only (R) */
+    data PT_LOAD FLAGS(6);   /* Read + Write (RW) */
+    bss PT_LOAD FLAGS(6);    /* Read + Write (RW) */
+}
+
+SECTIONS
+{
+    . = 0x40000000;  /* Kernel entry address */
+
+    .text : {
+        *(.text*)   /* All .text sections (code) */
+    } :text
+
+    .rodata : {
+        *(.rodata*) /* Read-only data */
+    } :rodata
+
+    .data : {
+        *(.data*)   /* Data sections */
+    } :data
+
+    .bss : {
+        *(.bss*)    /* BSS (zero-initialized) sections */
+    } :bss
+
+    /DISCARD/ : {
+        *(.comment)
+        *(.note)
+    }
+}

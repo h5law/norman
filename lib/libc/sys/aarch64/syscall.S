@@ -17,10 +17,8 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-    .syntax unified
-
     .text
-    .palign 0
+    .align 0
     .globl syscall
     .type syscall,%function
 syscall:
@@ -33,7 +31,7 @@ syscall:
     mov     x3, x4
     mov     x4, x5
     mov     x5, x6
-    swi     #0
+    svc     #0
 
     /* Check if x0 is negative (x0 < 0) */
     cmn     x0, #(4095 + 1)
@@ -48,7 +46,7 @@ syscall:
     /* Load the address of set_errno into a register */
     ldr     x12, =set_errno
     /* Call set_errno(x1) via the register */
-    blx     x12
+    blr     x12
     /* Set return value to 1 */
     mov     x0, #1
     ret

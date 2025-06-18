@@ -9,17 +9,22 @@ else
 	$(error "Unsupported architecture: $(ARCH)")
 endif
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
-AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
-AR=/usr/local/bin/arm-none-eabi-ar
-LD=/usr/local/bin/arm-none-eabi-ld
+CC=/usr/local/bin/aarch64-none-elf-gcc
+AS=/usr/local/bin/aarch64-none-elf-as
+AR=/usr/local/bin/aarch64-none-elf-ar
+LD=/usr/local/bin/aarch64-none-elf-ld
 
 CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 LIBRARY=${NORM_PATH}/lib/libnlibc.a
 HEADERS=stdio stdlib string sys semihost unistd
-ASM=${NORM_PATH}/lib/libc/sys/$(ARCH) ${NORM_PATH}/lib/libc/semihost/$(ARCH)
+ALL_ASM=${NORM_PATH}/lib/libc/sys/$(ARCH) ${NORM_PATH}/lib/libc/semihost/$(ARCH)
+ASM=$(NORM_PATH)/lib/libc/sys/$(ARCH)
+ifeq ($(BUILD_SEMIHOSTING),on)
+	ASM+=$(NORM_PATH)/lib/libc/semihost/$(ARCH)
+endif
+
 
 SOURCES = $(foreach dir,$(HEADERS),$(wildcard $(dir)/*.c))
 ASM_SOURCES = $(foreach dir,$(ASM),$(wildcard $(dir)/*.S))

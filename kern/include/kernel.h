@@ -17,13 +17,5 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-    .text
-    .align 0
-    .globl semihost
-    .type semihost,%function
-semihost:
-    hlt     #0xf000
-    ret
-    .size semihost, . - semihost
 
-// vim: ft=asm ts=4 sts=4 sw=4 et ai cin
+void kernel_entry(void);

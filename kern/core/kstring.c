@@ -17,13 +17,21 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-    .text
-    .align 0
-    .globl semihost
-    .type semihost,%function
-semihost:
-    hlt     #0xf000
-    ret
-    .size semihost, . - semihost
 
-// vim: ft=asm ts=4 sts=4 sw=4 et ai cin
+#include <machine/uart.h>
+
+#include "kstring.h"
+
+void putchar(const char c)
+{
+    while (UART_FR & (1 << 5)) {
+    } /* Wait if UART is busy */
+    UART_DR = c; /* Output character to UART */
+}
+
+void print(const char *str)
+{
+    while (*str) {
+        putchar(*str++);
+    }
+}
