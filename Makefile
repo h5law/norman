@@ -1,49 +1,54 @@
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
-unexport CFLAGS LDFLAGS LIBRARY_PATH C_INCLUDE_PATH
 
-CC=clang
-AS=as
-LD=ld.lld
-CFLAGS=-nostdinc -fno-builtin -ffreestanding -fno-stack-protector
-LDFLAGS=-nostdlib
-
-SRC_DIR=src
-TEST_DIR=tests
-BUILD_DIR=build
-INCLUDE_DIR=include
 LIB_DIR=lib
+BUILD_DIR=build
+TEST_DIR=tests
+INCLUDE_DIR=include
 
 ARCH := $(shell uname -m)
-ifneq ($(ARCH),arm64)
-ifneq ($(ARCH),aarch64)
-    $(error Unsupported architecture: $(ARCH))
-endif
+ifeq ($(ARCH),arm64)
+	ARCH = aarch64
+else ifeq ($(ARCH),x86_64)
+	ARCH = amd64
+else
+	$(error "Unsupported architecture: $(ARCH)")
 endif
 
-CRT_PRE=$(SRC_DIR)/crt/build/crt0.o $(SRC_DIR)/crt/build/crti.o $(SRC_DIR)/crt/build/crtbegin.o
-CRT_POST=$(SRC_DIR)/crt/build/crtend.o $(SRC_DIR)/crt/build/crtn.o
+CC=/usr/local/bin/aarch64-none-elf-gcc
+AS=/usr/local/bin/aarch64-none-elf-as
+AR=/usr/local/bin/aarch64-none-elf-ar
+LD=/usr/local/bin/aarch64-none-elf-ld
 
-.PHONY: clean build demo
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -fno-pie
+CFLAGS+= -ffreestanding -specs=${NORM_PATH}/nlibc.specs
+LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
+
+CRT_PRE=$(LIB_DIR)/crt/build/crt0.o $(LIB_DIR)/crt/build/crti.o
+CRT_POST=$(LIB_DIR)/crt/build/crtn.o
+
+.PHONY: clean build demo always
 
 always:
-	mkdir -pv $(SRC_DIR)
+	mkdir -pv $(LIB_DIR)
 	mkdir -pv $(TEST_DIR)
 	mkdir -pv $(BUILD_DIR)
 	mkdir -pv $(INCLUDE_DIR)
-	mkdir -pv $(LIB_DIR)
 
-nlibc: ${NORM_PATH}/$(SRC_DIR)
-	make clean build clean_src -C ${NORM_PATH}/$(SRC_DIR)
+nlibc: ${NORM_PATH}/$(LIB_DIR)/libc
+	make clean build -C ${NORM_PATH}/$(LIB_DIR)/libc
 
-crt: ${NORM_PATH}/$(SRC_DIR)/crt
-	make clean build -C ${NORM_PATH}/$(SRC_DIR)/crt
+crt: ${NORM_PATH}/$(LIB_DIR)/crt
+	# make clean build -C $(LIB_DIR)/crt
 
-$(BUILD_DIR)/demo: always nlibc crt $(TEST_DIR)/syscalls.c
-	$(CC) -I${NORM_PATH}/$(INCLUDE_DIR) -L${NORM_PATH}/$(LIB_DIR) -lnlibc -o $(BUILD_DIR)/demo $(CRT_PRE) $(TEST_DIR)/syscalls.c $(CRT_POST)
+$(BUILD_DIR)/demo.o: $(TEST_DIR)/demo.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/demo.o -c $(TEST_DIR)/demo.c
 
-build: clean always nlibc crt $(BUILD_DIR)/demo
+demo: always nlibc crt $(BUILD_DIR)/demo.o
+	$(CC) $(CFLAGS) $(LFLAGS) -nostartfiles -o $(BUILD_DIR)/demo.elf -Ur $(CRT_PRE) $(LIB_DIR)/crt/build/block.o $(BUILD_DIR)/demo.o ${NORM_PATH}/build/semihost.o $(CRT_POST)
 
-clean: ${NORM_PATH}/$(SRC_DIR) ${NORM_PATH}/$(SRC_DIR)/crt
-	make clean -C ${NORM_PATH}/$(SRC_DIR)
-	make clean -C ${NORM_PATH}/$(SRC_DIR)/crt
+build: clean always nlibc crt demo
+
+clean: $(LIB_DIR)/libc $(LIB_DIR)/crt
+	make clean -C ${NORM_PATH}/lib/libc
+	make clean -C ${NORM_PATH}/lib/crt
 	rm -vfrd $(BUILD_DIR)

@@ -1,0 +1,25 @@
+%rename     link    nlibc_link
+%rename     cpp     nlibc_cpp
+%rename     cc1     nlibc_cc1
+%rename     cc1plus nlibc_cc1plus
+
+*cpp:
+-I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections
+
+*cc1:
+-I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections
+
+*cc1plus:
+-I%:getenv(NORM_PATH /include) -nostdinc -ffreestanding -fno-builtin -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections
+
+*link:
+-nostdlib -T%:getenv(NORM_PATH /nlibc.ld) -L%:getenv(NORM_PATH /lib) -lnlibc --no-warn-rwx-segments
+
+*lib:
+--start-group -lnlibc --end-group
+
+*startfile:
+%:getenv(NORM_CRT0_PATH) %:getenv(NORM_PATH /lib/crt/build/crti.o)
+
+*endfile:
+%:getenv(NORM_PATH /lib/crt/build/crtn.o)

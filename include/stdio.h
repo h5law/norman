@@ -38,10 +38,10 @@ freely, subject to the following restrictions:
 // ...
 
 // File status constants
-#define F_OK 0
-#define X_OK 1
-#define W_OK 2
-#define R_OK 4
+#define F_OK       0
+#define X_OK       1
+#define W_OK       2
+#define R_OK       4
 
 #ifndef BUFSIZ
 #define BUFSIZ 4096
@@ -66,12 +66,12 @@ extern FILE *stdin;
 extern FILE *stdout;
 extern FILE *stderr;
 
-int read(unsigned int fd, char *buf, size_t buf_size);
-int write(unsigned int fd, const char *buf, size_t buf_size);
-int open(const char *path, int flag, int mode);
-int close(unsigned int fd);
+ssize_t read(int fd, char *buf, size_t buf_size);
+ssize_t write(int fd, const char *buf, size_t buf_size);
+int     open(const char *path, int flag, int mode);
+int     close(int fd);
 
-FILE  *fdopen(unsigned int fd, const char *mode);
+FILE  *fdopen(int fd, const char *mode);
 int    fflush(FILE *f);
 size_t fwrite(const void *buf, size_t size, size_t count, FILE *f);
 int    fputs(const char *str, FILE *f);
@@ -79,6 +79,9 @@ size_t fread(void *buf, size_t size, size_t count, FILE *f);
 int    fclose(FILE *f);
 
 int print(const char *str);
+int fputc(const char c, FILE *f);
+int putc(const char c, FILE *f);
+int putchar(int c);
 
 #endif /* ifndef NORM_STDIO_H */
 

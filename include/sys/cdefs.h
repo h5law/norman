@@ -21,6 +21,14 @@ freely, subject to the following restrictions:
 #ifndef NORM_SYS_CDEFS_H
 #define NORM_SYS_CDEFS_H
 
+#ifndef _u
+#ifdef __ASSEMBLER__
+#define _u(x) x
+#else
+#define _u(x) x##u
+#endif
+#endif
+
 #ifndef __has_attribute
 #define __has_attribute(x) 0
 #endif
@@ -36,6 +44,64 @@ freely, subject to the following restrictions:
 #ifndef __has_builtin
 #define __has_builtin(x) 0
 #endif
+
+#if __has_attribute(__noreturn__)
+#define __noreturn __attribute__((__noreturn__))
+#else
+#define __noreturn
+#endif
+
+#if __has_attribute(__always_inline__)
+#define __always_inline __inline __attribute__((__always_inline__))
+#else
+#define __always_inline
+#endif
+
+#if __has_attribute(__disable_sanitizer_instrumentation__)
+#define __disable_sanitizer_instrumentation                                    \
+    __attribute__((__disable_sanitizer_instrumentation__))
+#else
+#define __disable_sanitizer_instrumentation
+#endif
+
+#if __has_attribute(__no_sanitize_address__)
+#define __no_sanitize_address __attribute__((__no_sanitize_address__))
+#else
+#define __no_sanitize_address
+#endif
+
+#if __has_attribute(__no_sanitize__)
+#define __no_sanitize(s) __attribute__((__no_sanitize__(s)))
+#else
+#define __no_sanitize(s)
+#endif
+
+#if __has_attribute(__no_sanitize_undefined__)
+#define __no_sanitize_undefined __attribute__((__no_sanitize_undefined__))
+#else
+#define __no_sanitize_undefined
+#endif
+
+#define __disable_sanitizer                                                    \
+    __no_sanitize_address __no_sanitize_undefined                              \
+            __disable_sanitizer_instrumentation __no_sanitize("undefined")
+
+#if __has_attribute(__naked__)
+#define __naked __attribute__((__naked__))
+#else
+#define __naked
+#endif
+
+#if __has_attribute(__noinline__)
+#define __noinline __attribute__((__noinline__))
+#else
+#define __noinline
+#endif
+
+#define __CONCAT1(x, y) x##y
+#define __CONCAT(x, y)  __CONCAT1(x, y)
+#define __STRING(x)     #x          /* stringify without expanding x */
+#define __XSTRING(x)    __STRING(x) /* expand x, then stringify */
 
 #if defined(__cplusplus)
 #define __BEGIN_DECLS extern "C" {

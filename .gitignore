@@ -1,7 +1,11 @@
 .DS_Store
+external
 build/
+kern/build/
 .zig-cache/
 zig-out/
 .cache/*/**
 .idea/*/**
 lib/*.a
+.envrc
+*.o

@@ -1,3 +1,0 @@
-clang
-%c -std=c99 -ffreestanding -nostdinc -nostdlib
-%h -x c-header
