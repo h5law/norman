@@ -18,19 +18,17 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include <stdbool.h>
+#ifndef NORM_STDARG_H
+#define NORM_STDARG_H
 
-#include "kernel.h"
-#include "kstring.h"
+typedef struct va_list {
+    unsigned char *cur;
+} va_list;
 
-void kernel_entry(void)
-{
-    static bool kernel_initialized = false;
-    print("===================================================================="
-          "==========\n");
-    print("=                              Welcome to aiOnS                     "
-          "         =\n");
-    print("===================================================================="
-          "==========\n\n");
-    kernel_initialized = true;
-}
+#define va_start(a, last) ((a).cur = ( unsigned char * )(&(last)))
+#define va_arg(a, type)   (*(( type * )((a).cur = (a).cur + sizeof(type))))
+#define va_end(a)         ((a).cur = NULL)
+
+#endif /* ifndef NORM_STDARG_H */
+
+// vim: ft=c ts=4 sts=4 sw=4 et ai cin

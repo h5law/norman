@@ -18,10 +18,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef ROLLO_KERN_H
-#define ROLLO_KERN_H
+#ifndef ROLLO_MACH_PSCI_H
+#define ROLLO_MACH_PSCI_H
 
-void kernel_entry(void);
-void system_off(void);
+#define PSCI_0_2_FN_SYSTEM_OFF 0x84000008 /* PSCI SYSTEM_OFF - FN ID */
 
-#endif /* #ifndef ROLLO_KERN_H */
+void psci_system_off(void);
+
+#endif /* #ifndef ROLLO_MACH_PSCI_H */

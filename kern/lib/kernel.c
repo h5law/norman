@@ -18,10 +18,43 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef ROLLO_KERN_H
-#define ROLLO_KERN_H
+#include <machine/uart.h>
+#include <machine/psci.h>
 
-void kernel_entry(void);
-void system_off(void);
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-#endif /* #ifndef ROLLO_KERN_H */
+#include "kernel.h"
+
+void uart_input(void);
+
+void kernel_entry(void)
+{
+    static bool kernel_initialized = false;
+
+    uart_init(uart0_hw);
+    uart_puts(uart0_hw, "[kernel] UART initialized\n");
+
+    kernel_initialized = true;
+
+    uart_input();
+    psci_system_off();
+
+    while (1)
+        ;
+}
+
+void uart_input(void)
+{
+    char buf[32] = {0};
+    uart_gets(uart0_hw, buf, 32, 512 * 1024 * 1024);
+    int len = strlen(buf);
+    uart_puts(uart0_hw, "\n[kernel] Input string [");
+    char digit[33] = {0};
+    itoa(len, digit, 10);
+    uart_puts(uart0_hw, digit);
+    uart_puts(uart0_hw, " chars]: ");
+    uart_puts(uart0_hw, buf);
+    uart_putc(uart0_hw, '\n');
+}

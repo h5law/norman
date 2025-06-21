@@ -18,8 +18,22 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#ifndef ROLLO_MACH_UART_H
+#define ROLLO_MACH_UART_H
+
+#include <virt/uart.h>
+
 #include <stdint.h>
 
-#define UART_BASE 0x09000000
-#define UART_DR   (*( volatile uint32_t * )(UART_BASE + 0x00)) // Data register
-#define UART_FR   (*( volatile uint32_t * )(UART_BASE + 0x18)) // Flag register
+void uart_init(uart_hw_t *uart);
+void uart_reset(uart_hw_t *uart);
+
+void uart_puts(uart_hw_t *uart, const char *str);
+void uart_putc(uart_hw_t *uart, char c);
+char uart_getc(uart_hw_t *uart);
+int  uart_getc_timeout(uart_hw_t *uart, char *c, uint32_t timeout_ticks);
+void uart_gets(uart_hw_t *uart, char *buffer, int max_length,
+               uint32_t timeout_ticks);
+void uart_printf(uart_hw_t *uart, const char *fmt, ...);
+
+#endif /* #ifndef ROLLO_MACH_UART_H */

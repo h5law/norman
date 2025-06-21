@@ -14,12 +14,13 @@ else
 	$(error "Unsupported architecture: $(ARCH)")
 endif
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
-AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
-AR=/usr/local/bin/arm-none-eabi-ar
-LD=/usr/local/bin/arm-none-eabi-ld
+CC=/usr/local/bin/aarch64-none-elf-gcc
+AS=/usr/local/bin/aarch64-none-elf-as
+AR=/usr/local/bin/aarch64-none-elf-ar
+LD=/usr/local/bin/aarch64-none-elf-ld
 
-CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -fno-pie
+CFLAGS+= -ffreestanding -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 CRT_PRE=$(LIB_DIR)/crt/build/crt0.o $(LIB_DIR)/crt/build/crti.o
@@ -37,7 +38,7 @@ nlibc: ${NORM_PATH}/$(LIB_DIR)/libc
 	make clean build -C ${NORM_PATH}/$(LIB_DIR)/libc
 
 crt: ${NORM_PATH}/$(LIB_DIR)/crt
-	make clean build -C $(LIB_DIR)/crt
+	# make clean build -C $(LIB_DIR)/crt
 
 $(BUILD_DIR)/demo.o: $(TEST_DIR)/demo.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/demo.o -c $(TEST_DIR)/demo.c

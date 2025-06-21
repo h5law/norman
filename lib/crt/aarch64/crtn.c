@@ -18,10 +18,16 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef ROLLO_KERN_H
-#define ROLLO_KERN_H
+#ifndef NORM_CRTN_H
+#define NORM_CRTN_H
 
-void kernel_entry(void);
-void system_off(void);
+typedef void (*crt_fn)(void);
 
-#endif /* #ifndef ROLLO_KERN_H */
+crt_fn _init_array_end[0] __attribute__((used, section(".init_array"),
+                                         aligned(sizeof(crt_fn)))) = {};
+crt_fn _fini_array_end[0] __attribute__((used, section(".fini_array"),
+                                         aligned(sizeof(crt_fn)))) = {};
+
+#endif /* ifndef NORM_CRTN_H */
+
+// vim: ft=c ts=4 sts=4 sw=4 cin et nospell

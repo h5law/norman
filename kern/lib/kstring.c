@@ -18,10 +18,20 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef ROLLO_KERN_H
-#define ROLLO_KERN_H
+#include <machine/uart.h>
 
-void kernel_entry(void);
-void system_off(void);
+#include "kstring.h"
 
-#endif /* #ifndef ROLLO_KERN_H */
+void putchar(const char c)
+{
+    while (uart0_hw->fr & (1 << 3)) {
+    } /* Wait if UART is busy */
+    uart0_hw->dr = c; /* Output character to UART */
+}
+
+void print(const char *str)
+{
+    while (*str) {
+        putchar(*str++);
+    }
+}

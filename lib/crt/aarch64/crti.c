@@ -18,20 +18,31 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#include <machine/uart.h>
+#ifndef NORM_CRTI_H
+#define NORM_CRTI_H
 
-#include "kstring.h"
+typedef void (*crt_fn)(void);
 
-void putchar(const char c)
+extern crt_fn _init_array_start[0], _init_array_end[0];
+extern crt_fn _fini_array_start[0], _fini_array_end[0];
+
+void _init(void)
 {
-    while (UART_FR & (1 << 5)) {
-    } /* Wait if UART is busy */
-    UART_DR = c; /* Output character to UART */
+    for (crt_fn *func = _init_array_start; func != _init_array_end; func++)
+        (*func)();
 }
 
-void print(const char *str)
+void _fini(void)
 {
-    while (*str) {
-        putchar(*str++);
-    }
+    for (crt_fn *func = _fini_array_start; func != _fini_array_end; func++)
+        (*func)();
 }
+
+crt_fn _init_array_start[0] __attribute__((used, section(".init_array"),
+                                           aligned(sizeof(crt_fn)))) = {};
+crt_fn _fini_array_start[0] __attribute__((used, section(".fini_array"),
+                                           aligned(sizeof(crt_fn)))) = {};
+
+#endif /* ifndef NORM_CRT_I_H */
+
+// vim: ft=c ts=4 sts=4 sw=4 cin et nospell

@@ -35,7 +35,7 @@ char *ltoa(long n, char *str, int base)
         n          = -n;
     }
     while (n != 0) {
-        int rem   = mod(n, base);
+        int rem   = n % base;
         str[i++]  = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
         ldiv_t dt = ldiv(n, base);
         n         = dt.quot;

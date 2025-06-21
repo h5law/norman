@@ -9,15 +9,16 @@ else
 	$(error "Unsupported architecture: $(ARCH)")
 endif
 
-SRC_DIR=arm
+SRC_DIR=$(ARCH)
 BUILD_DIR=build
 
-CC=/usr/local/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
-AS=/usr/local/bin/arm-none-eabi-as -mcpu=cortex-m33 -mfloat-abi=softvp -mthumb -g
-AR=/usr/local/bin/arm-none-eabi-ar
-LD=/usr/local/bin/arm-none-eabi-ld
+CC=/usr/local/bin/aarch64-none-elf-gcc
+AS=/usr/local/bin/aarch64-none-elf-as
+AR=/usr/local/bin/aarch64-none-elf-ar
+LD=/usr/local/bin/aarch64-none-elf-ld
 
-CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -fno-pie
+CFLAFS+= -ffreestanding -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 CRTI=$(SRC_DIR)/crti.c

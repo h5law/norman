@@ -18,10 +18,18 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef ROLLO_KERN_H
-#define ROLLO_KERN_H
+#include <machine/psci.h>
 
-void kernel_entry(void);
-void system_off(void);
+#include "kstring.h"
 
-#endif /* #ifndef ROLLO_KERN_H */
+void psci_system_off(void)
+{
+    print("[kernel] ROLLO Kernel Shutting down...\n");
+    asm volatile(
+            "mov x0, %0\n" /* Load PSCI_SYSTEM_OFF FN ID into register x0 */
+            "hvc #0\n"     /* Execute the HVC instruction */
+            :              /* No outputs captured */
+            : "r"(PSCI_0_2_FN_SYSTEM_OFF) /* PSCI FN ID */
+            : "x0"                        /* Register (Clobbered) */
+    );
+}

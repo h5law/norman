@@ -22,15 +22,19 @@ ENTRY(_start)
 
 PHDRS
 {
-    text PT_LOAD FLAGS(5);   /* Read + Execute (RX) */
-    rodata PT_LOAD FLAGS(4); /* Read-only (R) */
-    data PT_LOAD FLAGS(6);   /* Read + Write (RW) */
-    bss PT_LOAD FLAGS(6);    /* Read + Write (RW) */
+    text    PT_LOAD FLAGS(5); /* Read + Execute (RX) */
+    rodata  PT_LOAD FLAGS(4); /* Read-only (R) */
+    data    PT_LOAD FLAGS(6); /* Read + Write (RW) */
+    bss     PT_LOAD FLAGS(6); /* Read + Write (RW) */
 }
 
 SECTIONS
 {
     . = 0x40000000;  /* Kernel entry address */
+
+    .vectors : {
+        *(.vectors*) /* Exception vector table */
+    } :text
 
     .text : {
         *(.text*)   /* All .text sections (code) */
@@ -46,10 +50,6 @@ SECTIONS
 
     .bss : {
         *(.bss*)    /* BSS (zero-initialized) sections */
+        *(COMMON*)
     } :bss
-
-    /DISCARD/ : {
-        *(.comment)
-        *(.note)
-    }
 }

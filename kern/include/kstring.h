@@ -18,5 +18,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#ifndef ROLLO_KSTR_H
+#define ROLLO_KSTR_H
+
 void putchar(const char c);
 void print(const char *str);
+
+#endif /* #ifndef ROLLO_KSTR_H */

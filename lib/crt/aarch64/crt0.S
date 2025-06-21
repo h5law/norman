@@ -18,10 +18,4 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#ifndef ROLLO_KERN_H
-#define ROLLO_KERN_H
 
-void kernel_entry(void);
-void system_off(void);
-
-#endif /* #ifndef ROLLO_KERN_H */

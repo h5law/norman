@@ -1,10 +1,34 @@
 [default_config]
 version = "0.10.0"
-assembler = "go"
-instruction_set = "aarch64"
+assembler = "gas"
+instruction_set = "arm64"
 
 [default_config.opts]
-compiler = "/usr/local/bin/arm-none-eabi-gcc"
+compiler = "/usr/local/bin/aarch64-none-elf-gcc"
+compile_flags_txt = [
+    "cc",
+    "-x",
+    "assembler-with-cpp",
+    "-nostdinc",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
+    "-target",
+    "aarch64-none-elf",
+    "-std=c99",
+]
+diagnostics = true
+default_diagnostics = false
+
+[[project]]
+version = "0.10.0"
+path = "kern/boot/aarch64"
+assembler = "gas"
+instruction_set = "arm64"
+
+[project.opts]
+compiler = "/usr/local/bin/aarch64-none-elf-gcc"
 compile_flags_txt = [
     "cc",
     "-x",

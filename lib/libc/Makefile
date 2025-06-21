@@ -9,12 +9,13 @@ else
 	$(error "Unsupported architecture: $(ARCH)")
 endif
 
-CC=/usr/local/bin/aarch64-none-elf-gcc
-AS=/usr/local/bin/aarch64-none-elf-as
+CC=/usr/local/bin/aarch64-none-elf-gcc -g
+AS=/usr/local/bin/aarch64-none-elf-as -g
 AR=/usr/local/bin/aarch64-none-elf-ar
 LD=/usr/local/bin/aarch64-none-elf-ld
 
-CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -ffreestanding -fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -specs=${NORM_PATH}/nlibc.specs
+CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -fno-pie
+CFLAFS+= -ffreestanding -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc
 
 LIBRARY=${NORM_PATH}/lib/libnlibc.a

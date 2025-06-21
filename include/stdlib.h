@@ -90,16 +90,14 @@ void exit(int status);
 void _Exit(int status);
 int  atexit(void (*func)(void));
 
-void reverse(char *str, size_t length);
-
 div_t  div(int n, int base);
 ldiv_t ldiv(long n, long base);
-int    mod(int n, int base);
 int    abs(int x);
 long   labs(long x);
 
 char *ltoa(long n, char *str, int base);
 char *itoa(int n, char *str, int base);
+void  reverse(char *str, size_t len);
 
 int   fork(void);
 pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage);
