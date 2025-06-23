@@ -9,9 +9,6 @@ else
 	$(error "Unsupported architecture: $(ARCH)")
 endif
 
-CC=/usr/local/bin/aarch64-none-elf-gcc -mcpu=cortex-a53 -march=armv8-a+crc -g
-AS=/usr/local/bin/aarch64-none-elf-as -mcpu=cortex-a53 -march=armv8-a+crc -g
-LD=/usr/local/bin/aarch64-none-elf-ld
 
 CFLAGS=-I${NORM_PATH}/kern/include -I${NORM_PATH}/kern/include/hw -I${NORM_PATH}/include
 CFLAGS+= -ffreestanding -fno-builtin -nostdinc -nostartfiles -fno-pie

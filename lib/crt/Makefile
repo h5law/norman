@@ -12,11 +12,6 @@ endif
 SRC_DIR=$(ARCH)
 BUILD_DIR=build
 
-CC=/usr/local/bin/aarch64-none-elf-gcc
-AS=/usr/local/bin/aarch64-none-elf-as
-AR=/usr/local/bin/aarch64-none-elf-ar
-LD=/usr/local/bin/aarch64-none-elf-ld
-
 CFLAGS=-nostdinc -I${NORM_PATH}/include -fno-builtin -fno-pie
 CFLAFS+= -ffreestanding -specs=${NORM_PATH}/nlibc.specs
 LDFLAGS=-nostdlib -L${NORM_PATH}/lib -lnlibc

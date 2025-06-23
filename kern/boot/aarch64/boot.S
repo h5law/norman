@@ -84,15 +84,12 @@ hang:
     .globl _start
     .type _start,%function
 _start:
-    /* Set up the vector table */
     ldr x0, =vector_table
     msr VBAR_EL1, x0
 
-    /* Set up the stack pointer */
     ldr x0, =stack_top
     mov sp, x0
 
-    /* Print bootloader message */
     ldr x0, =boot_msg
     bl print_string
 
@@ -100,7 +97,6 @@ boot_kernel:
     ldr x0, =jump_to_kernel_msg
     bl print_string
 
-    /* Jump to the kernel entry point */
     ldr x0, =kernel_entry
     br x0
 
